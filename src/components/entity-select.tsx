@@ -9,13 +9,16 @@ type Props = {
   placeholder?: string;
   labelKey?: string;
   allowNone?: boolean;
+  filter?: { column: string; value: string };
 };
 
-export function EntitySelect({ table, value, onChange, placeholder = "Selecione...", labelKey = "nome", allowNone = true }: Props) {
+export function EntitySelect({ table, value, onChange, placeholder = "Selecione...", labelKey = "nome", allowNone = true, filter }: Props) {
   const { data = [] } = useQuery({
-    queryKey: [`select-${table}`],
+    queryKey: [`select-${table}`, filter?.column, filter?.value],
     queryFn: async () => {
-      const { data, error } = await supabase.from(table as any).select(`id, ${labelKey}`).order(labelKey);
+      let q = supabase.from(table as any).select(`id, ${labelKey}`).order(labelKey);
+      if (filter) q = q.eq(filter.column, filter.value);
+      const { data, error } = await q;
       if (error) throw error;
       return data as any[];
     },
