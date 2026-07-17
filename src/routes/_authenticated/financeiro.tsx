@@ -429,6 +429,7 @@ function ReceberForm({ editing, onSubmit, loading }: { editing: any | null; onSu
         <div><Label>Data recebimento</Label><Input type="date" value={v.data_recebimento} onChange={(e) => setV({ ...v, data_recebimento: e.target.value })} /></div>
         <div><Label>Valor recebido</Label><Input type="number" step="0.01" value={v.valor_recebido} onChange={(e) => setV({ ...v, valor_recebido: e.target.value })} /></div>
         <div><Label>Local de recebimento</Label><Input value={v.local_recebimento} onChange={(e) => setV({ ...v, local_recebimento: e.target.value })} /></div>
+        <div className="col-span-2"><Label>Banco</Label><EntitySelect table="bancos" value={v.banco_id} onChange={(id) => setV({ ...v, banco_id: id })} /></div>
         <div><Label>Status</Label>
           <Select value={v.status} onValueChange={(s) => setV({ ...v, status: s })}>
             <SelectTrigger><SelectValue /></SelectTrigger>
