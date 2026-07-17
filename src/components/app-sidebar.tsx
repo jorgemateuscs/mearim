@@ -8,6 +8,7 @@ import {
   Wrench,
   Package,
   Landmark,
+  Boxes,
   LogOut,
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -34,6 +35,7 @@ const items = [
   { title: "Profissionais", url: "/profissionais", icon: UserCog },
   { title: "Serviços", url: "/servicos", icon: Wrench },
   { title: "Estoque", url: "/estoque", icon: Package },
+  { title: "Inventário", url: "/inventario", icon: Boxes },
   { title: "Conciliação", url: "/conciliacao", icon: Landmark },
 ];
 
