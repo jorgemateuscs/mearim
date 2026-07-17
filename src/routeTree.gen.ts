@@ -21,6 +21,7 @@ import { Route as AuthenticatedInventarioRouteImport } from './routes/_authentic
 import { Route as AuthenticatedFornecedoresRouteImport } from './routes/_authenticated/fornecedores'
 import { Route as AuthenticatedFinanceiroRouteImport } from './routes/_authenticated/financeiro'
 import { Route as AuthenticatedEstoqueRouteImport } from './routes/_authenticated/estoque'
+import { Route as AuthenticatedEquipamentosRouteImport } from './routes/_authenticated/equipamentos'
 import { Route as AuthenticatedConciliacaoRouteImport } from './routes/_authenticated/conciliacao'
 import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticated/clientes'
 import { Route as AuthenticatedConfigUsuariosRouteImport } from './routes/_authenticated/config.usuarios'
@@ -90,6 +91,12 @@ const AuthenticatedEstoqueRoute = AuthenticatedEstoqueRouteImport.update({
   path: '/estoque',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedEquipamentosRoute =
+  AuthenticatedEquipamentosRouteImport.update({
+    id: '/equipamentos',
+    path: '/equipamentos',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedConciliacaoRoute =
   AuthenticatedConciliacaoRouteImport.update({
     id: '/conciliacao',
@@ -137,6 +144,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/clientes': typeof AuthenticatedClientesRoute
   '/conciliacao': typeof AuthenticatedConciliacaoRoute
+  '/equipamentos': typeof AuthenticatedEquipamentosRoute
   '/estoque': typeof AuthenticatedEstoqueRoute
   '/financeiro': typeof AuthenticatedFinanceiroRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
@@ -157,6 +165,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/clientes': typeof AuthenticatedClientesRoute
   '/conciliacao': typeof AuthenticatedConciliacaoRoute
+  '/equipamentos': typeof AuthenticatedEquipamentosRoute
   '/estoque': typeof AuthenticatedEstoqueRoute
   '/financeiro': typeof AuthenticatedFinanceiroRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
@@ -179,6 +188,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/clientes': typeof AuthenticatedClientesRoute
   '/_authenticated/conciliacao': typeof AuthenticatedConciliacaoRoute
+  '/_authenticated/equipamentos': typeof AuthenticatedEquipamentosRoute
   '/_authenticated/estoque': typeof AuthenticatedEstoqueRoute
   '/_authenticated/financeiro': typeof AuthenticatedFinanceiroRoute
   '/_authenticated/fornecedores': typeof AuthenticatedFornecedoresRoute
@@ -201,6 +211,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/clientes'
     | '/conciliacao'
+    | '/equipamentos'
     | '/estoque'
     | '/financeiro'
     | '/fornecedores'
@@ -221,6 +232,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/clientes'
     | '/conciliacao'
+    | '/equipamentos'
     | '/estoque'
     | '/financeiro'
     | '/fornecedores'
@@ -242,6 +254,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/clientes'
     | '/_authenticated/conciliacao'
+    | '/_authenticated/equipamentos'
     | '/_authenticated/estoque'
     | '/_authenticated/financeiro'
     | '/_authenticated/fornecedores'
@@ -350,6 +363,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEstoqueRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/equipamentos': {
+      id: '/_authenticated/equipamentos'
+      path: '/equipamentos'
+      fullPath: '/equipamentos'
+      preLoaderRoute: typeof AuthenticatedEquipamentosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/conciliacao': {
       id: '/_authenticated/conciliacao'
       path: '/conciliacao'
@@ -405,6 +425,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedClientesRoute: typeof AuthenticatedClientesRoute
   AuthenticatedConciliacaoRoute: typeof AuthenticatedConciliacaoRoute
+  AuthenticatedEquipamentosRoute: typeof AuthenticatedEquipamentosRoute
   AuthenticatedEstoqueRoute: typeof AuthenticatedEstoqueRoute
   AuthenticatedFinanceiroRoute: typeof AuthenticatedFinanceiroRoute
   AuthenticatedFornecedoresRoute: typeof AuthenticatedFornecedoresRoute
@@ -424,6 +445,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedClientesRoute: AuthenticatedClientesRoute,
   AuthenticatedConciliacaoRoute: AuthenticatedConciliacaoRoute,
+  AuthenticatedEquipamentosRoute: AuthenticatedEquipamentosRoute,
   AuthenticatedEstoqueRoute: AuthenticatedEstoqueRoute,
   AuthenticatedFinanceiroRoute: AuthenticatedFinanceiroRoute,
   AuthenticatedFornecedoresRoute: AuthenticatedFornecedoresRoute,
