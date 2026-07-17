@@ -409,6 +409,7 @@ function ReceberForm({ editing, onSubmit, loading }: { editing: any | null; onSu
     valor_recebido: editing?.valor_recebido ?? "",
     status: editing?.status ?? "pendente",
     local_recebimento: editing?.local_recebimento ?? "",
+    banco_id: editing?.banco_id ?? null,
     observacao: editing?.observacao ?? "",
   }));
 
