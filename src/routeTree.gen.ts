@@ -24,6 +24,7 @@ import { Route as AuthenticatedEstoqueRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedConciliacaoRouteImport } from './routes/_authenticated/conciliacao'
 import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticated/clientes'
 import { Route as AuthenticatedConfigMeiosPagamentoRouteImport } from './routes/_authenticated/config.meios-pagamento'
+import { Route as AuthenticatedConfigCategoriasRouteImport } from './routes/_authenticated/config.categorias'
 import { Route as AuthenticatedConfigBancosRouteImport } from './routes/_authenticated/config.bancos'
 
 const AuthRoute = AuthRouteImport.update({
@@ -104,6 +105,12 @@ const AuthenticatedConfigMeiosPagamentoRoute =
     path: '/config/meios-pagamento',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedConfigCategoriasRoute =
+  AuthenticatedConfigCategoriasRouteImport.update({
+    id: '/config/categorias',
+    path: '/config/categorias',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedConfigBancosRoute =
   AuthenticatedConfigBancosRouteImport.update({
     id: '/config/bancos',
@@ -126,6 +133,7 @@ export interface FileRoutesByFullPath {
   '/servicos': typeof AuthenticatedServicosRoute
   '/vendas': typeof AuthenticatedVendasRoute
   '/config/bancos': typeof AuthenticatedConfigBancosRoute
+  '/config/categorias': typeof AuthenticatedConfigCategoriasRoute
   '/config/meios-pagamento': typeof AuthenticatedConfigMeiosPagamentoRoute
 }
 export interface FileRoutesByTo {
@@ -143,6 +151,7 @@ export interface FileRoutesByTo {
   '/servicos': typeof AuthenticatedServicosRoute
   '/vendas': typeof AuthenticatedVendasRoute
   '/config/bancos': typeof AuthenticatedConfigBancosRoute
+  '/config/categorias': typeof AuthenticatedConfigCategoriasRoute
   '/config/meios-pagamento': typeof AuthenticatedConfigMeiosPagamentoRoute
 }
 export interface FileRoutesById {
@@ -162,6 +171,7 @@ export interface FileRoutesById {
   '/_authenticated/servicos': typeof AuthenticatedServicosRoute
   '/_authenticated/vendas': typeof AuthenticatedVendasRoute
   '/_authenticated/config/bancos': typeof AuthenticatedConfigBancosRoute
+  '/_authenticated/config/categorias': typeof AuthenticatedConfigCategoriasRoute
   '/_authenticated/config/meios-pagamento': typeof AuthenticatedConfigMeiosPagamentoRoute
 }
 export interface FileRouteTypes {
@@ -181,6 +191,7 @@ export interface FileRouteTypes {
     | '/servicos'
     | '/vendas'
     | '/config/bancos'
+    | '/config/categorias'
     | '/config/meios-pagamento'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -198,6 +209,7 @@ export interface FileRouteTypes {
     | '/servicos'
     | '/vendas'
     | '/config/bancos'
+    | '/config/categorias'
     | '/config/meios-pagamento'
   id:
     | '__root__'
@@ -216,6 +228,7 @@ export interface FileRouteTypes {
     | '/_authenticated/servicos'
     | '/_authenticated/vendas'
     | '/_authenticated/config/bancos'
+    | '/_authenticated/config/categorias'
     | '/_authenticated/config/meios-pagamento'
   fileRoutesById: FileRoutesById
 }
@@ -332,6 +345,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConfigMeiosPagamentoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/config/categorias': {
+      id: '/_authenticated/config/categorias'
+      path: '/config/categorias'
+      fullPath: '/config/categorias'
+      preLoaderRoute: typeof AuthenticatedConfigCategoriasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/config/bancos': {
       id: '/_authenticated/config/bancos'
       path: '/config/bancos'
@@ -355,6 +375,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedServicosRoute: typeof AuthenticatedServicosRoute
   AuthenticatedVendasRoute: typeof AuthenticatedVendasRoute
   AuthenticatedConfigBancosRoute: typeof AuthenticatedConfigBancosRoute
+  AuthenticatedConfigCategoriasRoute: typeof AuthenticatedConfigCategoriasRoute
   AuthenticatedConfigMeiosPagamentoRoute: typeof AuthenticatedConfigMeiosPagamentoRoute
 }
 
@@ -371,6 +392,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedServicosRoute: AuthenticatedServicosRoute,
   AuthenticatedVendasRoute: AuthenticatedVendasRoute,
   AuthenticatedConfigBancosRoute: AuthenticatedConfigBancosRoute,
+  AuthenticatedConfigCategoriasRoute: AuthenticatedConfigCategoriasRoute,
   AuthenticatedConfigMeiosPagamentoRoute:
     AuthenticatedConfigMeiosPagamentoRoute,
 }
