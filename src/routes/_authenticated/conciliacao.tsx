@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatBRL, formatDate } from "@/lib/format";
-import { Plus, Pencil, Trash2, Landmark, ArrowLeftRight, TrendingUp, TrendingDown, Wallet } from "lucide-react";
+import { Plus, Pencil, Trash2, Landmark, ArrowLeftRight, TrendingUp, TrendingDown, Wallet, Filter } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/conciliacao")({
@@ -21,51 +21,114 @@ export const Route = createFileRoute("/_authenticated/conciliacao")({
   component: ConciliacaoPage,
 });
 
+const ALL = "__all";
+
 function ConciliacaoPage() {
+  const [bancoFilter, setBancoFilter] = useState<string>(ALL);
+
+  const { data: bancos = [] } = useQuery({
+    queryKey: ["bancos"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("bancos").select("*").order("nome");
+      if (error) throw error;
+      return data as any[];
+    },
+  });
+
   return (
     <div className="space-y-5">
-      <header>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Conciliação Bancária</h1>
-        <p className="text-sm text-muted-foreground">Contas bancárias, transferências e saldos.</p>
+      <header className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Conciliação Bancária</h1>
+          <p className="text-sm text-muted-foreground">Contas bancárias, transferências e saldos por banco.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Filter className="h-4 w-4 text-muted-foreground" />
+          <Select value={bancoFilter} onValueChange={setBancoFilter}>
+            <SelectTrigger className="w-56"><SelectValue placeholder="Filtrar banco..." /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL}>Todos os bancos</SelectItem>
+              {bancos.map((b) => <SelectItem key={b.id} value={b.id}>{b.nome}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
       </header>
-      <ResumoSaldos />
-      <Tabs defaultValue="bancos" className="space-y-4">
+
+      <ResumoSaldos bancoId={bancoFilter} bancos={bancos} />
+
+      <Tabs defaultValue="saldos" className="space-y-4">
         <TabsList>
+          <TabsTrigger value="saldos"><Wallet className="h-4 w-4 mr-2" />Saldos por banco</TabsTrigger>
           <TabsTrigger value="bancos"><Landmark className="h-4 w-4 mr-2" />Bancos</TabsTrigger>
           <TabsTrigger value="transferencias"><ArrowLeftRight className="h-4 w-4 mr-2" />Transferências</TabsTrigger>
         </TabsList>
+        <TabsContent value="saldos"><SaldosPorBanco bancos={bancos} /></TabsContent>
         <TabsContent value="bancos"><Bancos /></TabsContent>
-        <TabsContent value="transferencias"><Transferencias /></TabsContent>
+        <TabsContent value="transferencias"><Transferencias bancoId={bancoFilter} bancos={bancos} /></TabsContent>
       </Tabs>
     </div>
   );
 }
 
-/* ============================= RESUMO ============================= */
+/* ============================= CÁLCULO ============================= */
 
-function ResumoSaldos() {
-  const { data } = useQuery({
-    queryKey: ["conciliacao-resumo"],
+type BancoMov = { saldoInicial: number; entradas: number; saidas: number; saldoAtual: number };
+
+function useMovimentacoes() {
+  return useQuery({
+    queryKey: ["conciliacao-movs"],
     queryFn: async () => {
-      const [bc, cr, cp] = await Promise.all([
-        supabase.from("bancos").select("id,nome,saldo_inicial"),
-        supabase.from("contas_receber").select("valor_recebido,status"),
-        supabase.from("contas_pagar").select("valor_pago,status"),
+      const [cr, cp, tr] = await Promise.all([
+        supabase.from("contas_receber").select("banco_id,valor_recebido,status"),
+        supabase.from("contas_pagar").select("banco_id,valor_pago,status"),
+        supabase.from("transferencias").select("banco_origem_id,banco_destino_id,valor"),
       ]);
-      const saldoInicial = (bc.data ?? []).reduce((s, b) => s + Number(b.saldo_inicial ?? 0), 0);
-      const entradas = (cr.data ?? []).filter((r) => r.status === "recebido").reduce((s, r) => s + Number(r.valor_recebido ?? 0), 0);
-      const saidas = (cp.data ?? []).filter((r) => r.status === "pago").reduce((s, r) => s + Number(r.valor_pago ?? 0), 0);
-      const previstoReceber = (cr.data ?? []).filter((r) => r.status !== "recebido").reduce((s, r) => s + 0, 0);
-      return { saldoInicial, entradas, saidas, saldoAtual: saldoInicial + entradas - saidas, previstoReceber };
+      return {
+        recebidos: (cr.data ?? []).filter((r) => r.status === "recebido"),
+        pagos: (cp.data ?? []).filter((r) => r.status === "pago"),
+        transfers: tr.data ?? [],
+      };
     },
   });
-  const r = data ?? { saldoInicial: 0, entradas: 0, saidas: 0, saldoAtual: 0 };
+}
+
+function computeBanco(bancoId: string | null, saldoInicial: number, movs: any): BancoMov {
+  const recebidos = movs.recebidos.filter((r: any) => (bancoId ? r.banco_id === bancoId : true))
+    .reduce((s: number, r: any) => s + Number(r.valor_recebido ?? 0), 0);
+  const pagos = movs.pagos.filter((r: any) => (bancoId ? r.banco_id === bancoId : true))
+    .reduce((s: number, r: any) => s + Number(r.valor_pago ?? 0), 0);
+  const transfIn = bancoId ? movs.transfers.filter((t: any) => t.banco_destino_id === bancoId).reduce((s: number, t: any) => s + Number(t.valor ?? 0), 0) : 0;
+  const transfOut = bancoId ? movs.transfers.filter((t: any) => t.banco_origem_id === bancoId).reduce((s: number, t: any) => s + Number(t.valor ?? 0), 0) : 0;
+  const entradas = recebidos + transfIn;
+  const saidas = pagos + transfOut;
+  return { saldoInicial, entradas, saidas, saldoAtual: saldoInicial + entradas - saidas };
+}
+
+/* ============================= RESUMO ============================= */
+
+function ResumoSaldos({ bancoId, bancos }: { bancoId: string; bancos: any[] }) {
+  const { data: movs } = useMovimentacoes();
+  const r = useMemo<BancoMov>(() => {
+    if (!movs) return { saldoInicial: 0, entradas: 0, saidas: 0, saldoAtual: 0 };
+    if (bancoId === ALL) {
+      const saldoInicial = bancos.reduce((s, b) => s + Number(b.saldo_inicial ?? 0), 0);
+      return computeBanco(null, saldoInicial, movs);
+    }
+    const b = bancos.find((x) => x.id === bancoId);
+    return computeBanco(bancoId, Number(b?.saldo_inicial ?? 0), movs);
+  }, [movs, bancoId, bancos]);
+
+  const label = bancoId === ALL ? "Todos os bancos" : (bancos.find((b) => b.id === bancoId)?.nome ?? "");
+
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-      <Kpi label="Saldo inicial" value={formatBRL(r.saldoInicial)} icon={<Wallet className="h-4 w-4" />} />
-      <Kpi label="Entradas (recebidas)" value={formatBRL(r.entradas)} icon={<TrendingUp className="h-4 w-4 text-emerald-500" />} />
-      <Kpi label="Saídas (pagas)" value={formatBRL(r.saidas)} icon={<TrendingDown className="h-4 w-4 text-red-500" />} />
-      <Kpi label="Saldo atual" value={formatBRL(r.saldoAtual)} icon={<Landmark className="h-4 w-4 text-primary" />} highlight />
+    <div className="space-y-2">
+      {bancoId !== ALL && <div className="text-xs uppercase tracking-wider text-muted-foreground">Exibindo: <span className="text-foreground font-medium">{label}</span></div>}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <Kpi label="Saldo inicial" value={formatBRL(r.saldoInicial)} icon={<Wallet className="h-4 w-4" />} />
+        <Kpi label="Entradas" value={formatBRL(r.entradas)} icon={<TrendingUp className="h-4 w-4 text-emerald-500" />} />
+        <Kpi label="Saídas" value={formatBRL(r.saidas)} icon={<TrendingDown className="h-4 w-4 text-red-500" />} />
+        <Kpi label="Saldo atual" value={formatBRL(r.saldoAtual)} icon={<Landmark className="h-4 w-4 text-primary" />} highlight />
+      </div>
     </div>
   );
 }
@@ -78,6 +141,61 @@ function Kpi({ label, value, icon, highlight }: { label: string; value: string; 
         {icon}
       </div>
       <div className="text-xl font-semibold mt-1">{value}</div>
+    </Card>
+  );
+}
+
+/* ============================= SALDOS POR BANCO ============================= */
+
+function SaldosPorBanco({ bancos }: { bancos: any[] }) {
+  const { data: movs, isLoading } = useMovimentacoes();
+  const rows = useMemo(() => {
+    if (!movs) return [] as (BancoMov & { id: string; nome: string })[];
+    return bancos.map((b) => ({ id: b.id, nome: b.nome, ...computeBanco(b.id, Number(b.saldo_inicial ?? 0), movs) }));
+  }, [movs, bancos]);
+
+  const totais = useMemo(() => rows.reduce((acc, r) => ({
+    saldoInicial: acc.saldoInicial + r.saldoInicial,
+    entradas: acc.entradas + r.entradas,
+    saidas: acc.saidas + r.saidas,
+    saldoAtual: acc.saldoAtual + r.saldoAtual,
+  }), { saldoInicial: 0, entradas: 0, saidas: 0, saldoAtual: 0 }), [rows]);
+
+  return (
+    <Card className="overflow-hidden p-0">
+      <Table>
+        <TableHeader>
+          <TableRow className="bg-muted/30 hover:bg-muted/30">
+            <TableHead>Banco</TableHead>
+            <TableHead className="text-right">Saldo inicial</TableHead>
+            <TableHead className="text-right">Entradas</TableHead>
+            <TableHead className="text-right">Saídas</TableHead>
+            <TableHead className="text-right">Saldo atual</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {isLoading && <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Carregando...</TableCell></TableRow>}
+          {!isLoading && rows.length === 0 && <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Nenhum banco cadastrado.</TableCell></TableRow>}
+          {rows.map((r) => (
+            <TableRow key={r.id}>
+              <TableCell className="font-medium">{r.nome}</TableCell>
+              <TableCell className="text-right">{formatBRL(r.saldoInicial)}</TableCell>
+              <TableCell className="text-right text-emerald-500">{formatBRL(r.entradas)}</TableCell>
+              <TableCell className="text-right text-red-500">{formatBRL(r.saidas)}</TableCell>
+              <TableCell className="text-right font-semibold">{formatBRL(r.saldoAtual)}</TableCell>
+            </TableRow>
+          ))}
+          {rows.length > 0 && (
+            <TableRow className="bg-muted/20 font-semibold">
+              <TableCell>Total</TableCell>
+              <TableCell className="text-right">{formatBRL(totais.saldoInicial)}</TableCell>
+              <TableCell className="text-right text-emerald-500">{formatBRL(totais.entradas)}</TableCell>
+              <TableCell className="text-right text-red-500">{formatBRL(totais.saidas)}</TableCell>
+              <TableCell className="text-right">{formatBRL(totais.saldoAtual)}</TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
     </Card>
   );
 }
@@ -115,7 +233,7 @@ function Bancos() {
     onSuccess: () => {
       toast.success(editing ? "Atualizado" : "Cadastrado");
       qc.invalidateQueries({ queryKey: ["bancos"] });
-      qc.invalidateQueries({ queryKey: ["conciliacao-resumo"] });
+      qc.invalidateQueries({ queryKey: ["conciliacao-movs"] });
       qc.invalidateQueries({ queryKey: ["select-bancos"] });
       setOpen(false); setEditing(null);
     },
@@ -124,7 +242,7 @@ function Bancos() {
 
   const del = useMutation({
     mutationFn: async (id: string) => { const { error } = await supabase.from("bancos").delete().eq("id", id); if (error) throw error; },
-    onSuccess: () => { toast.success("Removido"); qc.invalidateQueries({ queryKey: ["bancos"] }); qc.invalidateQueries({ queryKey: ["conciliacao-resumo"] }); },
+    onSuccess: () => { toast.success("Removido"); qc.invalidateQueries({ queryKey: ["bancos"] }); qc.invalidateQueries({ queryKey: ["conciliacao-movs"] }); },
   });
 
   return (
@@ -191,15 +309,10 @@ function BancoForm({ editing, onSubmit, loading }: { editing: any | null; onSubm
 
 /* ============================= TRANSFERÊNCIAS ============================= */
 
-function Transferencias() {
+function Transferencias({ bancoId, bancos }: { bancoId: string; bancos: any[] }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
-
-  const { data: bancos = [] } = useQuery({
-    queryKey: ["bancos"],
-    queryFn: async () => (await supabase.from("bancos").select("id,nome").order("nome")).data ?? [],
-  });
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["transferencias"],
@@ -212,6 +325,8 @@ function Transferencias() {
       return data as any[];
     },
   });
+
+  const filtered = useMemo(() => bancoId === ALL ? rows : rows.filter((r) => r.banco_origem_id === bancoId || r.banco_destino_id === bancoId), [rows, bancoId]);
 
   const save = useMutation({
     mutationFn: async (v: any) => {
@@ -233,27 +348,27 @@ function Transferencias() {
         if (error) throw error;
       }
     },
-    onSuccess: () => { toast.success(editing ? "Atualizado" : "Registrada"); qc.invalidateQueries({ queryKey: ["transferencias"] }); setOpen(false); setEditing(null); },
+    onSuccess: () => { toast.success(editing ? "Atualizado" : "Registrada"); qc.invalidateQueries({ queryKey: ["transferencias"] }); qc.invalidateQueries({ queryKey: ["conciliacao-movs"] }); setOpen(false); setEditing(null); },
     onError: (e: any) => toast.error(e.message ?? "Erro"),
   });
 
   const del = useMutation({
     mutationFn: async (id: string) => { const { error } = await supabase.from("transferencias").delete().eq("id", id); if (error) throw error; },
-    onSuccess: () => { toast.success("Removida"); qc.invalidateQueries({ queryKey: ["transferencias"] }); },
+    onSuccess: () => { toast.success("Removida"); qc.invalidateQueries({ queryKey: ["transferencias"] }); qc.invalidateQueries({ queryKey: ["conciliacao-movs"] }); },
   });
 
-  const total = useMemo(() => rows.reduce((s, r) => s + Number(r.valor ?? 0), 0), [rows]);
+  const total = useMemo(() => filtered.reduce((s, r) => s + Number(r.valor ?? 0), 0), [filtered]);
 
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Kpi label="Transferências" value={String(rows.length)} icon={<ArrowLeftRight className="h-4 w-4" />} />
+        <Kpi label="Transferências" value={String(filtered.length)} icon={<ArrowLeftRight className="h-4 w-4" />} />
         <Kpi label="Volume movimentado" value={formatBRL(total)} icon={<Wallet className="h-4 w-4" />} />
         <div />
         <div className="flex items-end justify-end">
           <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setEditing(null); }}>
             <DialogTrigger asChild><Button disabled={bancos.length < 1}><Plus className="h-4 w-4 mr-1" />Nova transferência</Button></DialogTrigger>
-            <TransferForm editing={editing} bancos={bancos as any[]} onSubmit={(p) => save.mutate(p)} loading={save.isPending} />
+            <TransferForm editing={editing} bancos={bancos} onSubmit={(p) => save.mutate(p)} loading={save.isPending} />
           </Dialog>
         </div>
       </div>
@@ -278,8 +393,8 @@ function Transferencias() {
           </TableHeader>
           <TableBody>
             {isLoading && <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Carregando...</TableCell></TableRow>}
-            {!isLoading && rows.length === 0 && <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Nenhuma transferência registrada.</TableCell></TableRow>}
-            {rows.map((r) => (
+            {!isLoading && filtered.length === 0 && <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Nenhuma transferência registrada.</TableCell></TableRow>}
+            {filtered.map((r) => (
               <TableRow key={r.id}>
                 <TableCell>{formatDate(r.data_transferencia)}</TableCell>
                 <TableCell>{r.origem?.nome ?? "—"}</TableCell>
