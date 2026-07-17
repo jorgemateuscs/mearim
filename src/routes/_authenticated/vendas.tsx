@@ -69,7 +69,7 @@ function VendasProdutos() {
       const valor_total = quantidade * valor_unitario;
       const custo_total = quantidade * custo_unitario;
       const { data: userData } = await supabase.auth.getUser();
-      const user_id = userData.user?.id;
+      const user_id = userData.user?.id; if (!user_id) throw new Error("Não autenticado");
       const payload = {
         data_venda: v.data_venda,
         cliente_id: v.cliente_id || null,
@@ -266,7 +266,7 @@ function VendasServicos() {
   const save = useMutation({
     mutationFn: async (v: any) => {
       const { data: userData } = await supabase.auth.getUser();
-      const user_id = userData.user?.id;
+      const user_id = userData.user?.id; if (!user_id) throw new Error("Não autenticado");
       const payload = {
         data_venda: v.data_venda,
         data_prevista_fim: v.data_prevista_fim || null,
