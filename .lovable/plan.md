@@ -1,52 +1,30 @@
-# Sistema Gestão — Plano de Construção
 
-Sistema completo de gestão comercial (baseado nas telas da planilha "Gestão Excel"), redesenhado do zero com visual moderno e banco de dados persistente.
+## Objetivo
+Ver o saldo de cada banco separadamente na tela **Conciliação Bancária**, com saldo inicial, entradas, saídas e saldo atual próprios — além do consolidado.
 
-## Módulos (8 telas)
+## Mudanças no banco
+Hoje `contas_pagar` e `contas_receber` não têm vínculo com banco, então não é possível saber em qual conta o dinheiro entrou/saiu. Migration para adicionar:
+- `contas_pagar.banco_id` (uuid, FK → bancos, nullable)
+- `contas_receber.banco_id` (uuid, FK → bancos, nullable)
 
-1. **Painel** — dashboard com KPIs, gráficos mensais, ranking, resumo de clientes e contas a pagar
-2. **Cadastro de Vendas** — Vendas de Produtos + Vendas de Serviços
-3. **Controle Financeiro** — Contas a Pagar + Contas a Receber (com filtros ano/mês/status)
-4. **Cadastro de Clientes** — dados, aniversário, prospecção, próximo contato
-5. **Profissionais** — funcionários, comissão, salário, dias de trabalho
-6. **Serviços** — catálogo de serviços com valor, custo, comissão
-7. **Controle de Estoque** — produtos, quantidade, custo, valor de venda
-8. **Conciliação Bancária** — bancos/caixas, transferências, saldo
+Contas antigas ficam sem banco (não entram no cálculo por banco, mas continuam no consolidado).
 
-## Design
+## Mudanças na UI (`src/routes/_authenticated/conciliacao.tsx`)
 
-- Layout novo com **sidebar lateral** de navegação (troca as abas horizontais da planilha)
-- Paleta escura moderna (deep navy + accent teal/electric), tipografia contemporânea
-- Cards, tabelas modernas com filtros, dialogs para cadastro (troca os "botões vermelhos")
-- Português como idioma principal, formatação BRL/datas pt-BR
+1. **Seletor de banco** no topo da página: "Todos os bancos" + um item por banco cadastrado.
 
-## Backend (Lovable Cloud)
+2. **Cards de resumo** passam a refletir o banco selecionado:
+   - Saldo inicial (do banco, ou soma se "Todos")
+   - Entradas recebidas (contas_receber `recebido` com `banco_id` = filtro) + transferências recebidas
+   - Saídas pagas (contas_pagar `pago` com `banco_id` = filtro) + transferências enviadas
+   - Saldo atual = inicial + entradas − saídas
 
-- **Autenticação:** email/senha + Google
-- **Tabelas principais:**
-  - `profiles`, `user_roles` (padrão seguro)
-  - `clientes`, `profissionais`, `servicos`, `produtos`
-  - `vendas_produtos`, `vendas_produtos_itens`, `vendas_servicos`
-  - `contas_pagar`, `contas_receber`
-  - `bancos`, `transferencias`
-- Todos com RLS por `user_id` (cada usuário vê só seus dados)
+3. **Nova aba "Saldos por banco"**: tabela com uma linha por banco mostrando as 4 colunas (inicial, entradas, saídas, atual) — visão comparativa rápida.
 
-## Cálculos automáticos (regra de negócio)
+4. **Aba Transferências**: adiciona filtro pelo banco selecionado (mostra transferências onde ele é origem ou destino).
 
-- **Venda de produto** → dá baixa no estoque + gera conta a receber
-- **Venda de serviço** → gera conta a receber + comissão para profissional
-- **Painel** → agrega faturamento, despesas, saldo, rankings, aniversariantes, contas vencendo
+5. Formulários de **contas a pagar/receber** (em `financeiro.tsx`) ganham campo opcional "Banco" para que futuras movimentações sejam atribuíveis. *(Somente o select; nenhuma outra lógica muda.)*
 
-## Ordem de construção
-
-**Fase 1 (esta entrega):** Cloud + auth + design system + Sidebar/Layout + Painel + Cadastros base (Clientes, Profissionais, Serviços, Produtos)
-
-**Fase 2:** Vendas + Controle Financeiro (com integração automática)
-
-**Fase 3:** Conciliação Bancária + refinos de gráficos e relatórios
-
-Vou entregar a Fase 1 em cheio nesta rodada; depois seguimos com Fase 2 e 3.
-
----
-
-**Confirma que posso começar por aí?** Se quiser mudar a ordem, ou priorizar algum módulo específico primeiro, me avise.
+## Fora do escopo
+- Não altero o comportamento de vendas/estoque.
+- Contas antigas sem `banco_id` não são migradas automaticamente (usuário pode editar se quiser).
