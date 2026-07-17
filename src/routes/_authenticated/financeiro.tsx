@@ -233,8 +233,7 @@ function PagarForm({ editing, onSubmit, loading }: { editing: any | null; onSubm
         <div><Label>Data pagamento</Label><Input type="date" value={v.data_pagamento} onChange={(e) => setV({ ...v, data_pagamento: e.target.value })} /></div>
         <div><Label>Valor pago</Label><Input type="number" step="0.01" value={v.valor_pago} onChange={(e) => setV({ ...v, valor_pago: e.target.value })} /></div>
         <div><Label>Forma de pagamento</Label><Input value={v.forma_pagamento} onChange={(e) => setV({ ...v, forma_pagamento: e.target.value })} /></div>
-        <div><Label>Local de saída</Label><Input value={v.local_saida} onChange={(e) => setV({ ...v, local_saida: e.target.value })} /></div>
-        <div className="col-span-2"><Label>Banco</Label><EntitySelect table="bancos" value={v.banco_id} onChange={(id) => setV({ ...v, banco_id: id })} /></div>
+        <div><Label>Banco *</Label><EntitySelect table="bancos" value={v.banco_id} onChange={(id) => setV({ ...v, banco_id: id })} /></div>
         <div className="col-span-2"><Label>Observação</Label><Textarea rows={2} value={v.observacao} onChange={(e) => setV({ ...v, observacao: e.target.value })} /></div>
         <DialogFooter className="col-span-2"><Button type="submit" disabled={loading}>{loading ? "Salvando..." : "Salvar"}</Button></DialogFooter>
       </form>
@@ -428,8 +427,7 @@ function ReceberForm({ editing, onSubmit, loading }: { editing: any | null; onSu
         <div><Label>Valor da parcela *</Label><Input type="number" step="0.01" required value={v.valor_parcela} onChange={(e) => setV({ ...v, valor_parcela: e.target.value })} /></div>
         <div><Label>Data recebimento</Label><Input type="date" value={v.data_recebimento} onChange={(e) => setV({ ...v, data_recebimento: e.target.value })} /></div>
         <div><Label>Valor recebido</Label><Input type="number" step="0.01" value={v.valor_recebido} onChange={(e) => setV({ ...v, valor_recebido: e.target.value })} /></div>
-        <div><Label>Local de recebimento</Label><Input value={v.local_recebimento} onChange={(e) => setV({ ...v, local_recebimento: e.target.value })} /></div>
-        <div className="col-span-2"><Label>Banco</Label><EntitySelect table="bancos" value={v.banco_id} onChange={(id) => setV({ ...v, banco_id: id })} /></div>
+        <div className="col-span-2"><Label>Banco *</Label><EntitySelect table="bancos" value={v.banco_id} onChange={(id) => setV({ ...v, banco_id: id })} /></div>
         <div><Label>Status</Label>
           <Select value={v.status} onValueChange={(s) => setV({ ...v, status: s })}>
             <SelectTrigger><SelectValue /></SelectTrigger>
