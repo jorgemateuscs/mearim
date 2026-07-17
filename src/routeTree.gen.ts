@@ -14,13 +14,16 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedVendasRouteImport } from './routes/_authenticated/vendas'
 import { Route as AuthenticatedServicosRouteImport } from './routes/_authenticated/servicos'
+import { Route as AuthenticatedRelatoriosRouteImport } from './routes/_authenticated/relatorios'
 import { Route as AuthenticatedProfissionaisRouteImport } from './routes/_authenticated/profissionais'
 import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
 import { Route as AuthenticatedInventarioRouteImport } from './routes/_authenticated/inventario'
+import { Route as AuthenticatedFornecedoresRouteImport } from './routes/_authenticated/fornecedores'
 import { Route as AuthenticatedFinanceiroRouteImport } from './routes/_authenticated/financeiro'
 import { Route as AuthenticatedEstoqueRouteImport } from './routes/_authenticated/estoque'
 import { Route as AuthenticatedConciliacaoRouteImport } from './routes/_authenticated/conciliacao'
 import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticated/clientes'
+import { Route as AuthenticatedConfigMeiosPagamentoRouteImport } from './routes/_authenticated/config.meios-pagamento'
 import { Route as AuthenticatedConfigBancosRouteImport } from './routes/_authenticated/config.bancos'
 
 const AuthRoute = AuthRouteImport.update({
@@ -47,6 +50,11 @@ const AuthenticatedServicosRoute = AuthenticatedServicosRouteImport.update({
   path: '/servicos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedRelatoriosRoute = AuthenticatedRelatoriosRouteImport.update({
+  id: '/relatorios',
+  path: '/relatorios',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedProfissionaisRoute =
   AuthenticatedProfissionaisRouteImport.update({
     id: '/profissionais',
@@ -63,6 +71,12 @@ const AuthenticatedInventarioRoute = AuthenticatedInventarioRouteImport.update({
   path: '/inventario',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedFornecedoresRoute =
+  AuthenticatedFornecedoresRouteImport.update({
+    id: '/fornecedores',
+    path: '/fornecedores',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedFinanceiroRoute = AuthenticatedFinanceiroRouteImport.update({
   id: '/financeiro',
   path: '/financeiro',
@@ -84,6 +98,12 @@ const AuthenticatedClientesRoute = AuthenticatedClientesRouteImport.update({
   path: '/clientes',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedConfigMeiosPagamentoRoute =
+  AuthenticatedConfigMeiosPagamentoRouteImport.update({
+    id: '/config/meios-pagamento',
+    path: '/config/meios-pagamento',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedConfigBancosRoute =
   AuthenticatedConfigBancosRouteImport.update({
     id: '/config/bancos',
@@ -98,12 +118,15 @@ export interface FileRoutesByFullPath {
   '/conciliacao': typeof AuthenticatedConciliacaoRoute
   '/estoque': typeof AuthenticatedEstoqueRoute
   '/financeiro': typeof AuthenticatedFinanceiroRoute
+  '/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/inventario': typeof AuthenticatedInventarioRoute
   '/painel': typeof AuthenticatedPainelRoute
   '/profissionais': typeof AuthenticatedProfissionaisRoute
+  '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/servicos': typeof AuthenticatedServicosRoute
   '/vendas': typeof AuthenticatedVendasRoute
   '/config/bancos': typeof AuthenticatedConfigBancosRoute
+  '/config/meios-pagamento': typeof AuthenticatedConfigMeiosPagamentoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -112,12 +135,15 @@ export interface FileRoutesByTo {
   '/conciliacao': typeof AuthenticatedConciliacaoRoute
   '/estoque': typeof AuthenticatedEstoqueRoute
   '/financeiro': typeof AuthenticatedFinanceiroRoute
+  '/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/inventario': typeof AuthenticatedInventarioRoute
   '/painel': typeof AuthenticatedPainelRoute
   '/profissionais': typeof AuthenticatedProfissionaisRoute
+  '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/servicos': typeof AuthenticatedServicosRoute
   '/vendas': typeof AuthenticatedVendasRoute
   '/config/bancos': typeof AuthenticatedConfigBancosRoute
+  '/config/meios-pagamento': typeof AuthenticatedConfigMeiosPagamentoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -128,12 +154,15 @@ export interface FileRoutesById {
   '/_authenticated/conciliacao': typeof AuthenticatedConciliacaoRoute
   '/_authenticated/estoque': typeof AuthenticatedEstoqueRoute
   '/_authenticated/financeiro': typeof AuthenticatedFinanceiroRoute
+  '/_authenticated/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/_authenticated/inventario': typeof AuthenticatedInventarioRoute
   '/_authenticated/painel': typeof AuthenticatedPainelRoute
   '/_authenticated/profissionais': typeof AuthenticatedProfissionaisRoute
+  '/_authenticated/relatorios': typeof AuthenticatedRelatoriosRoute
   '/_authenticated/servicos': typeof AuthenticatedServicosRoute
   '/_authenticated/vendas': typeof AuthenticatedVendasRoute
   '/_authenticated/config/bancos': typeof AuthenticatedConfigBancosRoute
+  '/_authenticated/config/meios-pagamento': typeof AuthenticatedConfigMeiosPagamentoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -144,12 +173,15 @@ export interface FileRouteTypes {
     | '/conciliacao'
     | '/estoque'
     | '/financeiro'
+    | '/fornecedores'
     | '/inventario'
     | '/painel'
     | '/profissionais'
+    | '/relatorios'
     | '/servicos'
     | '/vendas'
     | '/config/bancos'
+    | '/config/meios-pagamento'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -158,12 +190,15 @@ export interface FileRouteTypes {
     | '/conciliacao'
     | '/estoque'
     | '/financeiro'
+    | '/fornecedores'
     | '/inventario'
     | '/painel'
     | '/profissionais'
+    | '/relatorios'
     | '/servicos'
     | '/vendas'
     | '/config/bancos'
+    | '/config/meios-pagamento'
   id:
     | '__root__'
     | '/'
@@ -173,12 +208,15 @@ export interface FileRouteTypes {
     | '/_authenticated/conciliacao'
     | '/_authenticated/estoque'
     | '/_authenticated/financeiro'
+    | '/_authenticated/fornecedores'
     | '/_authenticated/inventario'
     | '/_authenticated/painel'
     | '/_authenticated/profissionais'
+    | '/_authenticated/relatorios'
     | '/_authenticated/servicos'
     | '/_authenticated/vendas'
     | '/_authenticated/config/bancos'
+    | '/_authenticated/config/meios-pagamento'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -224,6 +262,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedServicosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/relatorios': {
+      id: '/_authenticated/relatorios'
+      path: '/relatorios'
+      fullPath: '/relatorios'
+      preLoaderRoute: typeof AuthenticatedRelatoriosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/profissionais': {
       id: '/_authenticated/profissionais'
       path: '/profissionais'
@@ -243,6 +288,13 @@ declare module '@tanstack/react-router' {
       path: '/inventario'
       fullPath: '/inventario'
       preLoaderRoute: typeof AuthenticatedInventarioRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/fornecedores': {
+      id: '/_authenticated/fornecedores'
+      path: '/fornecedores'
+      fullPath: '/fornecedores'
+      preLoaderRoute: typeof AuthenticatedFornecedoresRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/financeiro': {
@@ -273,6 +325,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClientesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/config/meios-pagamento': {
+      id: '/_authenticated/config/meios-pagamento'
+      path: '/config/meios-pagamento'
+      fullPath: '/config/meios-pagamento'
+      preLoaderRoute: typeof AuthenticatedConfigMeiosPagamentoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/config/bancos': {
       id: '/_authenticated/config/bancos'
       path: '/config/bancos'
@@ -288,12 +347,15 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedConciliacaoRoute: typeof AuthenticatedConciliacaoRoute
   AuthenticatedEstoqueRoute: typeof AuthenticatedEstoqueRoute
   AuthenticatedFinanceiroRoute: typeof AuthenticatedFinanceiroRoute
+  AuthenticatedFornecedoresRoute: typeof AuthenticatedFornecedoresRoute
   AuthenticatedInventarioRoute: typeof AuthenticatedInventarioRoute
   AuthenticatedPainelRoute: typeof AuthenticatedPainelRoute
   AuthenticatedProfissionaisRoute: typeof AuthenticatedProfissionaisRoute
+  AuthenticatedRelatoriosRoute: typeof AuthenticatedRelatoriosRoute
   AuthenticatedServicosRoute: typeof AuthenticatedServicosRoute
   AuthenticatedVendasRoute: typeof AuthenticatedVendasRoute
   AuthenticatedConfigBancosRoute: typeof AuthenticatedConfigBancosRoute
+  AuthenticatedConfigMeiosPagamentoRoute: typeof AuthenticatedConfigMeiosPagamentoRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -301,12 +363,16 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedConciliacaoRoute: AuthenticatedConciliacaoRoute,
   AuthenticatedEstoqueRoute: AuthenticatedEstoqueRoute,
   AuthenticatedFinanceiroRoute: AuthenticatedFinanceiroRoute,
+  AuthenticatedFornecedoresRoute: AuthenticatedFornecedoresRoute,
   AuthenticatedInventarioRoute: AuthenticatedInventarioRoute,
   AuthenticatedPainelRoute: AuthenticatedPainelRoute,
   AuthenticatedProfissionaisRoute: AuthenticatedProfissionaisRoute,
+  AuthenticatedRelatoriosRoute: AuthenticatedRelatoriosRoute,
   AuthenticatedServicosRoute: AuthenticatedServicosRoute,
   AuthenticatedVendasRoute: AuthenticatedVendasRoute,
   AuthenticatedConfigBancosRoute: AuthenticatedConfigBancosRoute,
+  AuthenticatedConfigMeiosPagamentoRoute:
+    AuthenticatedConfigMeiosPagamentoRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
