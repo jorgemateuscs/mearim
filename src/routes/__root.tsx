@@ -58,6 +58,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:description", content: "Painel completo para gerenciar vendas, clientes, estoque, financeiro e equipe do seu negócio." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Gestão — Sistema de Gestão Comercial" },
+      { name: "twitter:description", content: "Painel completo para gerenciar vendas, clientes, estoque, financeiro e equipe do seu negócio." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/2942b306-3173-4718-9105-f68988b8c774/id-preview-61859470--48231f95-2d6f-441b-8ed8-3afb2003a8bf.lovable.app-1784304704908.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/2942b306-3173-4718-9105-f68988b8c774/id-preview-61859470--48231f95-2d6f-441b-8ed8-3afb2003a8bf.lovable.app-1784304704908.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
