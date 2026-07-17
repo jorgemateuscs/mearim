@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,9 +13,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { formatBRL, formatDate } from "@/lib/format";
-import { Plus, Pencil, Trash2, Landmark, ArrowLeftRight, TrendingUp, TrendingDown, Wallet, Filter } from "lucide-react";
+import { Plus, Pencil, Trash2, Landmark, ArrowLeftRight, TrendingUp, TrendingDown, Wallet, Filter, History, FileDown } from "lucide-react";
 import { toast } from "sonner";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 export const Route = createFileRoute("/_authenticated/conciliacao")({
   ssr: false,
@@ -25,6 +29,11 @@ const ALL = "__all";
 
 function ConciliacaoPage() {
   const [bancoFilter, setBancoFilter] = useState<string>(ALL);
+  const today = new Date();
+  const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+  const [dataIni, setDataIni] = useState<string>(firstDay.toISOString().slice(0, 10));
+  const [dataFim, setDataFim] = useState<string>(today.toISOString().slice(0, 10));
+  const [tab, setTab] = useState<string>("historico");
 
   const { data: bancos = [] } = useQuery({
     queryKey: ["bancos"],
@@ -37,34 +46,48 @@ function ConciliacaoPage() {
 
   return (
     <div className="space-y-5">
-      <header className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+      <header className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-3">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Conciliação Bancária</h1>
-          <p className="text-sm text-muted-foreground">Contas bancárias, transferências e saldos por banco.</p>
+          <p className="text-sm text-muted-foreground">Histórico, transferências e cadastro de bancos.</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-muted-foreground" />
-          <Select value={bancoFilter} onValueChange={setBancoFilter}>
-            <SelectTrigger className="w-56"><SelectValue placeholder="Filtrar banco..." /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ALL}>Todos os bancos</SelectItem>
-              {bancos.map((b) => <SelectItem key={b.id} value={b.id}>{b.nome}</SelectItem>)}
-            </SelectContent>
-          </Select>
+        <div className="flex flex-wrap items-end gap-2">
+          <div className="flex flex-col">
+            <Label className="text-xs mb-1">Banco</Label>
+            <div className="flex items-center gap-1">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              <Select value={bancoFilter} onValueChange={setBancoFilter}>
+                <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ALL}>Todos os bancos</SelectItem>
+                  {bancos.map((b) => <SelectItem key={b.id} value={b.id}>{b.nome}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="flex flex-col">
+            <Label className="text-xs mb-1">Data inicial</Label>
+            <Input type="date" className="w-40" value={dataIni} onChange={(e) => setDataIni(e.target.value)} />
+          </div>
+          <div className="flex flex-col">
+            <Label className="text-xs mb-1">Data final</Label>
+            <Input type="date" className="w-40" value={dataFim} onChange={(e) => setDataFim(e.target.value)} />
+          </div>
+          <RelatorioPdfDialog bancos={bancos} defaultBanco={bancoFilter === ALL ? "" : bancoFilter} defaultIni={dataIni} defaultFim={dataFim} />
         </div>
       </header>
 
-      <ResumoSaldos bancoId={bancoFilter} bancos={bancos} />
+      <ResumoSaldos bancoId={bancoFilter} bancos={bancos} dataIni={dataIni} dataFim={dataFim} />
 
-      <Tabs defaultValue="saldos" className="space-y-4">
+      <Tabs value={tab} onValueChange={setTab} className="space-y-4">
         <TabsList>
-          <TabsTrigger value="saldos"><Wallet className="h-4 w-4 mr-2" />Saldos por banco</TabsTrigger>
-          <TabsTrigger value="bancos"><Landmark className="h-4 w-4 mr-2" />Bancos</TabsTrigger>
+          <TabsTrigger value="historico"><History className="h-4 w-4 mr-2" />Histórico</TabsTrigger>
           <TabsTrigger value="transferencias"><ArrowLeftRight className="h-4 w-4 mr-2" />Transferências</TabsTrigger>
+          <TabsTrigger value="bancos"><Landmark className="h-4 w-4 mr-2" />Cadastro de bancos</TabsTrigger>
         </TabsList>
-        <TabsContent value="saldos"><SaldosPorBanco bancos={bancos} /></TabsContent>
-        <TabsContent value="bancos"><Bancos /></TabsContent>
+        <TabsContent value="historico"><Historico bancoId={bancoFilter} bancos={bancos} dataIni={dataIni} dataFim={dataFim} /></TabsContent>
         <TabsContent value="transferencias"><Transferencias bancoId={bancoFilter} bancos={bancos} /></TabsContent>
+        <TabsContent value="bancos"><Bancos /></TabsContent>
       </Tabs>
     </div>
   );
@@ -74,18 +97,19 @@ function ConciliacaoPage() {
 
 type BancoMov = { saldoInicial: number; entradas: number; saidas: number; saldoAtual: number };
 
-function useMovimentacoes() {
+function useMovimentacoes(dataIni?: string, dataFim?: string) {
   return useQuery({
-    queryKey: ["conciliacao-movs"],
+    queryKey: ["conciliacao-movs", dataIni, dataFim],
     queryFn: async () => {
-      const [cr, cp, tr] = await Promise.all([
-        supabase.from("contas_receber").select("banco_id,valor_recebido,status"),
-        supabase.from("contas_pagar").select("banco_id,valor_pago,status"),
-        supabase.from("transferencias").select("banco_origem_id,banco_destino_id,valor"),
-      ]);
+      let crQ = supabase.from("contas_receber").select("id,banco_id,valor_recebido,status,data_recebimento,descricao,pagador_nome,clientes(nome)").eq("status", "recebido");
+      let cpQ = supabase.from("contas_pagar").select("id,banco_id,valor_pago,status,data_pagamento,descricao").eq("status", "pago");
+      let trQ = supabase.from("transferencias").select("id,banco_origem_id,banco_destino_id,valor,data_transferencia,observacao");
+      if (dataIni) { crQ = crQ.gte("data_recebimento", dataIni); cpQ = cpQ.gte("data_pagamento", dataIni); trQ = trQ.gte("data_transferencia", dataIni); }
+      if (dataFim) { crQ = crQ.lte("data_recebimento", dataFim); cpQ = cpQ.lte("data_pagamento", dataFim); trQ = trQ.lte("data_transferencia", dataFim); }
+      const [cr, cp, tr] = await Promise.all([crQ, cpQ, trQ]);
       return {
-        recebidos: (cr.data ?? []).filter((r) => r.status === "recebido"),
-        pagos: (cp.data ?? []).filter((r) => r.status === "pago"),
+        recebidos: cr.data ?? [],
+        pagos: cp.data ?? [],
         transfers: tr.data ?? [],
       };
     },
@@ -106,8 +130,8 @@ function computeBanco(bancoId: string | null, saldoInicial: number, movs: any): 
 
 /* ============================= RESUMO ============================= */
 
-function ResumoSaldos({ bancoId, bancos }: { bancoId: string; bancos: any[] }) {
-  const { data: movs } = useMovimentacoes();
+function ResumoSaldos({ bancoId, bancos, dataIni, dataFim }: { bancoId: string; bancos: any[]; dataIni: string; dataFim: string }) {
+  const { data: movs } = useMovimentacoes(dataIni, dataFim);
   const r = useMemo<BancoMov>(() => {
     if (!movs) return { saldoInicial: 0, entradas: 0, saidas: 0, saldoAtual: 0 };
     if (bancoId === ALL) {
