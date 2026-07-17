@@ -97,6 +97,7 @@ export type Database = {
       }
       contas_pagar: {
         Row: {
+          banco_id: string | null
           categoria: string | null
           created_at: string
           data_pagamento: string | null
@@ -113,6 +114,7 @@ export type Database = {
           valor_previsto: number
         }
         Insert: {
+          banco_id?: string | null
           categoria?: string | null
           created_at?: string
           data_pagamento?: string | null
@@ -129,6 +131,7 @@ export type Database = {
           valor_previsto?: number
         }
         Update: {
+          banco_id?: string | null
           categoria?: string | null
           created_at?: string
           data_pagamento?: string | null
@@ -144,10 +147,19 @@ export type Database = {
           valor_pago?: number | null
           valor_previsto?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "contas_pagar_banco_id_fkey"
+            columns: ["banco_id"]
+            isOneToOne: false
+            referencedRelation: "bancos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       contas_receber: {
         Row: {
+          banco_id: string | null
           cliente_id: string | null
           contato: string | null
           cpf_cnpj: string | null
@@ -168,6 +180,7 @@ export type Database = {
           valor_recebido: number | null
         }
         Insert: {
+          banco_id?: string | null
           cliente_id?: string | null
           contato?: string | null
           cpf_cnpj?: string | null
@@ -188,6 +201,7 @@ export type Database = {
           valor_recebido?: number | null
         }
         Update: {
+          banco_id?: string | null
           cliente_id?: string | null
           contato?: string | null
           cpf_cnpj?: string | null
@@ -208,6 +222,13 @@ export type Database = {
           valor_recebido?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "contas_receber_banco_id_fkey"
+            columns: ["banco_id"]
+            isOneToOne: false
+            referencedRelation: "bancos"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "contas_receber_cliente_id_fkey"
             columns: ["cliente_id"]

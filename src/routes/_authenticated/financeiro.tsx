@@ -87,6 +87,7 @@ function ContasPagar() {
         status: v.status || "pendente",
         forma_pagamento: v.forma_pagamento || null,
         local_saida: v.local_saida || null,
+        banco_id: v.banco_id || null,
         observacao: v.observacao || null,
       };
       if (editing?.id) {
@@ -211,6 +212,7 @@ function PagarForm({ editing, onSubmit, loading }: { editing: any | null; onSubm
     status: editing?.status ?? "pendente",
     forma_pagamento: editing?.forma_pagamento ?? "",
     local_saida: editing?.local_saida ?? "",
+    banco_id: editing?.banco_id ?? null,
     observacao: editing?.observacao ?? "",
   }));
 
@@ -232,6 +234,7 @@ function PagarForm({ editing, onSubmit, loading }: { editing: any | null; onSubm
         <div><Label>Valor pago</Label><Input type="number" step="0.01" value={v.valor_pago} onChange={(e) => setV({ ...v, valor_pago: e.target.value })} /></div>
         <div><Label>Forma de pagamento</Label><Input value={v.forma_pagamento} onChange={(e) => setV({ ...v, forma_pagamento: e.target.value })} /></div>
         <div><Label>Local de saída</Label><Input value={v.local_saida} onChange={(e) => setV({ ...v, local_saida: e.target.value })} /></div>
+        <div className="col-span-2"><Label>Banco</Label><EntitySelect table="bancos" value={v.banco_id} onChange={(id) => setV({ ...v, banco_id: id })} /></div>
         <div className="col-span-2"><Label>Observação</Label><Textarea rows={2} value={v.observacao} onChange={(e) => setV({ ...v, observacao: e.target.value })} /></div>
         <DialogFooter className="col-span-2"><Button type="submit" disabled={loading}>{loading ? "Salvando..." : "Salvar"}</Button></DialogFooter>
       </form>
@@ -275,6 +278,7 @@ function ContasReceber() {
         valor_recebido: v.valor_recebido === "" ? null : Number(v.valor_recebido),
         status: v.status || "pendente",
         local_recebimento: v.local_recebimento || null,
+        banco_id: v.banco_id || null,
         observacao: v.observacao || null,
       };
       if (editing?.id) {
@@ -405,6 +409,7 @@ function ReceberForm({ editing, onSubmit, loading }: { editing: any | null; onSu
     valor_recebido: editing?.valor_recebido ?? "",
     status: editing?.status ?? "pendente",
     local_recebimento: editing?.local_recebimento ?? "",
+    banco_id: editing?.banco_id ?? null,
     observacao: editing?.observacao ?? "",
   }));
 
@@ -424,6 +429,7 @@ function ReceberForm({ editing, onSubmit, loading }: { editing: any | null; onSu
         <div><Label>Data recebimento</Label><Input type="date" value={v.data_recebimento} onChange={(e) => setV({ ...v, data_recebimento: e.target.value })} /></div>
         <div><Label>Valor recebido</Label><Input type="number" step="0.01" value={v.valor_recebido} onChange={(e) => setV({ ...v, valor_recebido: e.target.value })} /></div>
         <div><Label>Local de recebimento</Label><Input value={v.local_recebimento} onChange={(e) => setV({ ...v, local_recebimento: e.target.value })} /></div>
+        <div className="col-span-2"><Label>Banco</Label><EntitySelect table="bancos" value={v.banco_id} onChange={(id) => setV({ ...v, banco_id: id })} /></div>
         <div><Label>Status</Label>
           <Select value={v.status} onValueChange={(s) => setV({ ...v, status: s })}>
             <SelectTrigger><SelectValue /></SelectTrigger>
