@@ -150,12 +150,13 @@ function GroupItem({ group, pathname, collapsed }: { group: Group; pathname: str
         <CollapsibleContent>
           <SidebarMenuSub>
             {group.children.map((c) => {
-              const path = c.url.split("?")[0];
+              const [path, qs] = c.url.split("?");
+              const search = qs ? Object.fromEntries(new URLSearchParams(qs)) : undefined;
               const active = pathname === path;
               return (
                 <SidebarMenuSubItem key={c.url}>
                   <SidebarMenuSubButton asChild isActive={active}>
-                    <Link to={c.url}><c.icon /><span>{c.title}</span></Link>
+                    <Link to={path} search={search as any}><c.icon /><span>{c.title}</span></Link>
                   </SidebarMenuSubButton>
                 </SidebarMenuSubItem>
               );
