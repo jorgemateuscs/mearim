@@ -212,6 +212,7 @@ function PagarForm({ editing, onSubmit, loading }: { editing: any | null; onSubm
     status: editing?.status ?? "pendente",
     forma_pagamento: editing?.forma_pagamento ?? "",
     local_saida: editing?.local_saida ?? "",
+    banco_id: editing?.banco_id ?? null,
     observacao: editing?.observacao ?? "",
   }));
 
