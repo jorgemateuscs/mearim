@@ -21,6 +21,7 @@ import { Route as AuthenticatedFinanceiroRouteImport } from './routes/_authentic
 import { Route as AuthenticatedEstoqueRouteImport } from './routes/_authenticated/estoque'
 import { Route as AuthenticatedConciliacaoRouteImport } from './routes/_authenticated/conciliacao'
 import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticated/clientes'
+import { Route as AuthenticatedConfigBancosRouteImport } from './routes/_authenticated/config.bancos'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -83,6 +84,12 @@ const AuthenticatedClientesRoute = AuthenticatedClientesRouteImport.update({
   path: '/clientes',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedConfigBancosRoute =
+  AuthenticatedConfigBancosRouteImport.update({
+    id: '/config/bancos',
+    path: '/config/bancos',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -96,6 +103,7 @@ export interface FileRoutesByFullPath {
   '/profissionais': typeof AuthenticatedProfissionaisRoute
   '/servicos': typeof AuthenticatedServicosRoute
   '/vendas': typeof AuthenticatedVendasRoute
+  '/config/bancos': typeof AuthenticatedConfigBancosRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -109,6 +117,7 @@ export interface FileRoutesByTo {
   '/profissionais': typeof AuthenticatedProfissionaisRoute
   '/servicos': typeof AuthenticatedServicosRoute
   '/vendas': typeof AuthenticatedVendasRoute
+  '/config/bancos': typeof AuthenticatedConfigBancosRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -124,6 +133,7 @@ export interface FileRoutesById {
   '/_authenticated/profissionais': typeof AuthenticatedProfissionaisRoute
   '/_authenticated/servicos': typeof AuthenticatedServicosRoute
   '/_authenticated/vendas': typeof AuthenticatedVendasRoute
+  '/_authenticated/config/bancos': typeof AuthenticatedConfigBancosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -139,6 +149,7 @@ export interface FileRouteTypes {
     | '/profissionais'
     | '/servicos'
     | '/vendas'
+    | '/config/bancos'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -152,6 +163,7 @@ export interface FileRouteTypes {
     | '/profissionais'
     | '/servicos'
     | '/vendas'
+    | '/config/bancos'
   id:
     | '__root__'
     | '/'
@@ -166,6 +178,7 @@ export interface FileRouteTypes {
     | '/_authenticated/profissionais'
     | '/_authenticated/servicos'
     | '/_authenticated/vendas'
+    | '/_authenticated/config/bancos'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -260,6 +273,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClientesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/config/bancos': {
+      id: '/_authenticated/config/bancos'
+      path: '/config/bancos'
+      fullPath: '/config/bancos'
+      preLoaderRoute: typeof AuthenticatedConfigBancosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -273,6 +293,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedProfissionaisRoute: typeof AuthenticatedProfissionaisRoute
   AuthenticatedServicosRoute: typeof AuthenticatedServicosRoute
   AuthenticatedVendasRoute: typeof AuthenticatedVendasRoute
+  AuthenticatedConfigBancosRoute: typeof AuthenticatedConfigBancosRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -285,6 +306,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedProfissionaisRoute: AuthenticatedProfissionaisRoute,
   AuthenticatedServicosRoute: AuthenticatedServicosRoute,
   AuthenticatedVendasRoute: AuthenticatedVendasRoute,
+  AuthenticatedConfigBancosRoute: AuthenticatedConfigBancosRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
