@@ -238,6 +238,57 @@ export type Database = {
           },
         ]
       }
+      inventario: {
+        Row: {
+          categoria: string
+          created_at: string
+          data_aquisicao: string | null
+          descricao: string | null
+          fornecedor: string | null
+          id: string
+          nome: string
+          observacao: string | null
+          quantidade: number
+          status_pagamento: string
+          updated_at: string
+          user_id: string
+          valor_pago: number
+          valor_total: number
+        }
+        Insert: {
+          categoria?: string
+          created_at?: string
+          data_aquisicao?: string | null
+          descricao?: string | null
+          fornecedor?: string | null
+          id?: string
+          nome: string
+          observacao?: string | null
+          quantidade?: number
+          status_pagamento?: string
+          updated_at?: string
+          user_id: string
+          valor_pago?: number
+          valor_total?: number
+        }
+        Update: {
+          categoria?: string
+          created_at?: string
+          data_aquisicao?: string | null
+          descricao?: string | null
+          fornecedor?: string | null
+          id?: string
+          nome?: string
+          observacao?: string | null
+          quantidade?: number
+          status_pagamento?: string
+          updated_at?: string
+          user_id?: string
+          valor_pago?: number
+          valor_total?: number
+        }
+        Relationships: []
+      }
       produtos: {
         Row: {
           codigo: string | null
