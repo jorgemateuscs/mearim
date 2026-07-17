@@ -278,6 +278,7 @@ function ContasReceber() {
         valor_recebido: v.valor_recebido === "" ? null : Number(v.valor_recebido),
         status: v.status || "pendente",
         local_recebimento: v.local_recebimento || null,
+        banco_id: v.banco_id || null,
         observacao: v.observacao || null,
       };
       if (editing?.id) {
