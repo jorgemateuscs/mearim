@@ -169,58 +169,204 @@ function Kpi({ label, value, icon, highlight }: { label: string; value: string; 
   );
 }
 
-/* ============================= SALDOS POR BANCO ============================= */
+/* ============================= HISTÓRICO ============================= */
 
-function SaldosPorBanco({ bancos }: { bancos: any[] }) {
-  const { data: movs, isLoading } = useMovimentacoes();
-  const rows = useMemo(() => {
-    if (!movs) return [] as (BancoMov & { id: string; nome: string })[];
-    return bancos.map((b) => ({ id: b.id, nome: b.nome, ...computeBanco(b.id, Number(b.saldo_inicial ?? 0), movs) }));
-  }, [movs, bancos]);
+type HistItem = {
+  id: string;
+  tipo: "recebimento" | "pagamento" | "transferencia_out" | "transferencia_in";
+  data: string;
+  descricao: string;
+  banco_id: string | null;
+  bancoNome: string;
+  valor: number;
+  entrada: boolean;
+};
 
-  const totais = useMemo(() => rows.reduce((acc, r) => ({
-    saldoInicial: acc.saldoInicial + r.saldoInicial,
-    entradas: acc.entradas + r.entradas,
-    saidas: acc.saidas + r.saidas,
-    saldoAtual: acc.saldoAtual + r.saldoAtual,
-  }), { saldoInicial: 0, entradas: 0, saidas: 0, saldoAtual: 0 }), [rows]);
+function buildHistorico(bancoId: string, bancos: any[], movs: any): HistItem[] {
+  const bancoNome = (id: string | null) => bancos.find((b) => b.id === id)?.nome ?? "—";
+  const items: HistItem[] = [];
+  for (const r of movs.recebidos as any[]) {
+    if (bancoId !== ALL && r.banco_id !== bancoId) continue;
+    items.push({
+      id: r.id, tipo: "recebimento",
+      data: r.data_recebimento,
+      descricao: `Recebimento: ${r.clientes?.nome ?? r.pagador_nome ?? r.descricao ?? "—"}`,
+      banco_id: r.banco_id, bancoNome: bancoNome(r.banco_id),
+      valor: Number(r.valor_recebido ?? 0), entrada: true,
+    });
+  }
+  for (const r of movs.pagos as any[]) {
+    if (bancoId !== ALL && r.banco_id !== bancoId) continue;
+    items.push({
+      id: r.id, tipo: "pagamento",
+      data: r.data_pagamento,
+      descricao: `Pagamento: ${r.descricao ?? "—"}`,
+      banco_id: r.banco_id, bancoNome: bancoNome(r.banco_id),
+      valor: Number(r.valor_pago ?? 0), entrada: false,
+    });
+  }
+  for (const t of movs.transfers as any[]) {
+    if (bancoId === ALL) {
+      items.push({
+        id: t.id, tipo: "transferencia_out", data: t.data_transferencia,
+        descricao: `Transferência: ${bancoNome(t.banco_origem_id)} → ${bancoNome(t.banco_destino_id)}`,
+        banco_id: t.banco_origem_id, bancoNome: bancoNome(t.banco_origem_id),
+        valor: Number(t.valor ?? 0), entrada: false,
+      });
+    } else {
+      if (t.banco_origem_id === bancoId) {
+        items.push({
+          id: t.id, tipo: "transferencia_out", data: t.data_transferencia,
+          descricao: `Transferência enviada → ${bancoNome(t.banco_destino_id)}`,
+          banco_id: t.banco_origem_id, bancoNome: bancoNome(t.banco_origem_id),
+          valor: Number(t.valor ?? 0), entrada: false,
+        });
+      }
+      if (t.banco_destino_id === bancoId) {
+        items.push({
+          id: t.id, tipo: "transferencia_in", data: t.data_transferencia,
+          descricao: `Transferência recebida ← ${bancoNome(t.banco_origem_id)}`,
+          banco_id: t.banco_destino_id, bancoNome: bancoNome(t.banco_destino_id),
+          valor: Number(t.valor ?? 0), entrada: true,
+        });
+      }
+    }
+  }
+  return items.sort((a, b) => (b.data ?? "").localeCompare(a.data ?? ""));
+}
+
+function tipoBadge(tipo: HistItem["tipo"]) {
+  const map: Record<HistItem["tipo"], { label: string; cls: string }> = {
+    recebimento: { label: "Recebimento", cls: "bg-emerald-500/15 text-emerald-500 border-emerald-500/30" },
+    pagamento: { label: "Pagamento", cls: "bg-red-500/15 text-red-500 border-red-500/30" },
+    transferencia_out: { label: "Transferência (saída)", cls: "bg-amber-500/15 text-amber-500 border-amber-500/30" },
+    transferencia_in: { label: "Transferência (entrada)", cls: "bg-sky-500/15 text-sky-500 border-sky-500/30" },
+  };
+  return map[tipo];
+}
+
+function Historico({ bancoId, bancos, dataIni, dataFim }: { bancoId: string; bancos: any[]; dataIni: string; dataFim: string }) {
+  const navigate = useNavigate();
+  const { data: movs, isLoading } = useMovimentacoes(dataIni, dataFim);
+  const items = useMemo(() => movs ? buildHistorico(bancoId, bancos, movs) : [], [movs, bancoId, bancos]);
+
+  const handleClick = (h: HistItem) => {
+    if (h.tipo === "recebimento") navigate({ to: "/financeiro", search: { tab: "receber" } as any });
+    else if (h.tipo === "pagamento") navigate({ to: "/financeiro", search: { tab: "pagar" } as any });
+    else navigate({ to: "/conciliacao", hash: "transferencias" });
+  };
 
   return (
     <Card className="overflow-hidden p-0">
-      <Table>
-        <TableHeader>
-          <TableRow className="bg-muted/30 hover:bg-muted/30">
-            <TableHead>Banco</TableHead>
-            <TableHead className="text-right">Saldo inicial</TableHead>
-            <TableHead className="text-right">Entradas</TableHead>
-            <TableHead className="text-right">Saídas</TableHead>
-            <TableHead className="text-right">Saldo atual</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {isLoading && <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Carregando...</TableCell></TableRow>}
-          {!isLoading && rows.length === 0 && <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Nenhum banco cadastrado.</TableCell></TableRow>}
-          {rows.map((r) => (
-            <TableRow key={r.id}>
-              <TableCell className="font-medium">{r.nome}</TableCell>
-              <TableCell className="text-right">{formatBRL(r.saldoInicial)}</TableCell>
-              <TableCell className="text-right text-emerald-500">{formatBRL(r.entradas)}</TableCell>
-              <TableCell className="text-right text-red-500">{formatBRL(r.saidas)}</TableCell>
-              <TableCell className="text-right font-semibold">{formatBRL(r.saldoAtual)}</TableCell>
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/30 hover:bg-muted/30">
+              <TableHead>Data</TableHead>
+              <TableHead>Tipo</TableHead>
+              <TableHead>Descrição</TableHead>
+              <TableHead>Banco</TableHead>
+              <TableHead className="text-right">Valor</TableHead>
             </TableRow>
-          ))}
-          {rows.length > 0 && (
-            <TableRow className="bg-muted/20 font-semibold">
-              <TableCell>Total</TableCell>
-              <TableCell className="text-right">{formatBRL(totais.saldoInicial)}</TableCell>
-              <TableCell className="text-right text-emerald-500">{formatBRL(totais.entradas)}</TableCell>
-              <TableCell className="text-right text-red-500">{formatBRL(totais.saidas)}</TableCell>
-              <TableCell className="text-right">{formatBRL(totais.saldoAtual)}</TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {isLoading && <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Carregando...</TableCell></TableRow>}
+            {!isLoading && items.length === 0 && <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Sem movimentações no período.</TableCell></TableRow>}
+            {items.map((h) => {
+              const b = tipoBadge(h.tipo);
+              return (
+                <TableRow key={`${h.tipo}-${h.id}`} className="cursor-pointer" onClick={() => handleClick(h)}>
+                  <TableCell>{formatDate(h.data)}</TableCell>
+                  <TableCell><Badge variant="outline" className={b.cls}>{b.label}</Badge></TableCell>
+                  <TableCell className="max-w-md truncate">{h.descricao}</TableCell>
+                  <TableCell>{h.bancoNome}</TableCell>
+                  <TableCell className={`text-right font-medium ${h.entrada ? "text-emerald-500" : "text-red-500"}`}>
+                    {h.entrada ? "+" : "−"} {formatBRL(h.valor)}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
     </Card>
+  );
+}
+
+/* ============================= RELATÓRIO PDF ============================= */
+
+function RelatorioPdfDialog({ bancos, defaultBanco, defaultIni, defaultFim }: { bancos: any[]; defaultBanco: string; defaultIni: string; defaultFim: string }) {
+  const [open, setOpen] = useState(false);
+  const [bancoId, setBancoId] = useState<string>(defaultBanco || (bancos[0]?.id ?? ""));
+  const [ini, setIni] = useState(defaultIni);
+  const [fim, setFim] = useState(defaultFim);
+  const qc = useQueryClient();
+
+  const gerar = async () => {
+    if (!bancoId) { toast.error("Selecione um banco"); return; }
+    const movs = await qc.fetchQuery({
+      queryKey: ["conciliacao-movs", ini, fim],
+      queryFn: async () => {
+        const [cr, cp, tr] = await Promise.all([
+          supabase.from("contas_receber").select("id,banco_id,valor_recebido,status,data_recebimento,descricao,pagador_nome,clientes(nome)").eq("status", "recebido").gte("data_recebimento", ini).lte("data_recebimento", fim),
+          supabase.from("contas_pagar").select("id,banco_id,valor_pago,status,data_pagamento,descricao").eq("status", "pago").gte("data_pagamento", ini).lte("data_pagamento", fim),
+          supabase.from("transferencias").select("id,banco_origem_id,banco_destino_id,valor,data_transferencia,observacao").gte("data_transferencia", ini).lte("data_transferencia", fim),
+        ]);
+        return { recebidos: cr.data ?? [], pagos: cp.data ?? [], transfers: tr.data ?? [] };
+      },
+    });
+    const items = buildHistorico(bancoId, bancos, movs);
+    const banco = bancos.find((b) => b.id === bancoId);
+    const saldoInicial = Number(banco?.saldo_inicial ?? 0);
+    const r = computeBanco(bancoId, saldoInicial, movs);
+
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text("Relatório Bancário", 14, 18);
+    doc.setFontSize(10);
+    doc.text(`Banco: ${banco?.nome ?? "—"}`, 14, 26);
+    doc.text(`Período: ${formatDate(ini)} a ${formatDate(fim)}`, 14, 32);
+    doc.text(`Saldo inicial: ${formatBRL(r.saldoInicial)}   Entradas: ${formatBRL(r.entradas)}   Saídas: ${formatBRL(r.saidas)}   Saldo atual: ${formatBRL(r.saldoAtual)}`, 14, 38);
+
+    autoTable(doc, {
+      startY: 44,
+      head: [["Data", "Tipo", "Descrição", "Valor"]],
+      body: items.map((h) => [
+        formatDate(h.data),
+        tipoBadge(h.tipo).label,
+        h.descricao,
+        `${h.entrada ? "+" : "-"} ${formatBRL(h.valor)}`,
+      ]),
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [30, 41, 59] },
+    });
+    doc.save(`relatorio-${banco?.nome ?? "banco"}-${ini}-${fim}.pdf`);
+    setOpen(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline"><FileDown className="h-4 w-4 mr-1" />Relatório PDF</Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-md">
+        <DialogHeader><DialogTitle>Relatório por banco (PDF)</DialogTitle></DialogHeader>
+        <div className="grid gap-4 pt-2">
+          <div>
+            <Label>Banco *</Label>
+            <Select value={bancoId} onValueChange={setBancoId}>
+              <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+              <SelectContent>{bancos.map((b) => <SelectItem key={b.id} value={b.id}>{b.nome}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div><Label>Data inicial *</Label><Input type="date" value={ini} onChange={(e) => setIni(e.target.value)} /></div>
+            <div><Label>Data final *</Label><Input type="date" value={fim} onChange={(e) => setFim(e.target.value)} /></div>
+          </div>
+        </div>
+        <DialogFooter><Button onClick={gerar}><FileDown className="h-4 w-4 mr-1" />Gerar PDF</Button></DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
