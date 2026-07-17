@@ -23,6 +23,8 @@ import { Route as AuthenticatedFinanceiroRouteImport } from './routes/_authentic
 import { Route as AuthenticatedEstoqueRouteImport } from './routes/_authenticated/estoque'
 import { Route as AuthenticatedConciliacaoRouteImport } from './routes/_authenticated/conciliacao'
 import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticated/clientes'
+import { Route as AuthenticatedConfigUsuariosRouteImport } from './routes/_authenticated/config.usuarios'
+import { Route as AuthenticatedConfigPermissoesRouteImport } from './routes/_authenticated/config.permissoes'
 import { Route as AuthenticatedConfigMeiosPagamentoRouteImport } from './routes/_authenticated/config.meios-pagamento'
 import { Route as AuthenticatedConfigCategoriasRouteImport } from './routes/_authenticated/config.categorias'
 import { Route as AuthenticatedConfigBancosRouteImport } from './routes/_authenticated/config.bancos'
@@ -99,6 +101,18 @@ const AuthenticatedClientesRoute = AuthenticatedClientesRouteImport.update({
   path: '/clientes',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedConfigUsuariosRoute =
+  AuthenticatedConfigUsuariosRouteImport.update({
+    id: '/config/usuarios',
+    path: '/config/usuarios',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedConfigPermissoesRoute =
+  AuthenticatedConfigPermissoesRouteImport.update({
+    id: '/config/permissoes',
+    path: '/config/permissoes',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedConfigMeiosPagamentoRoute =
   AuthenticatedConfigMeiosPagamentoRouteImport.update({
     id: '/config/meios-pagamento',
@@ -135,6 +149,8 @@ export interface FileRoutesByFullPath {
   '/config/bancos': typeof AuthenticatedConfigBancosRoute
   '/config/categorias': typeof AuthenticatedConfigCategoriasRoute
   '/config/meios-pagamento': typeof AuthenticatedConfigMeiosPagamentoRoute
+  '/config/permissoes': typeof AuthenticatedConfigPermissoesRoute
+  '/config/usuarios': typeof AuthenticatedConfigUsuariosRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -153,6 +169,8 @@ export interface FileRoutesByTo {
   '/config/bancos': typeof AuthenticatedConfigBancosRoute
   '/config/categorias': typeof AuthenticatedConfigCategoriasRoute
   '/config/meios-pagamento': typeof AuthenticatedConfigMeiosPagamentoRoute
+  '/config/permissoes': typeof AuthenticatedConfigPermissoesRoute
+  '/config/usuarios': typeof AuthenticatedConfigUsuariosRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -173,6 +191,8 @@ export interface FileRoutesById {
   '/_authenticated/config/bancos': typeof AuthenticatedConfigBancosRoute
   '/_authenticated/config/categorias': typeof AuthenticatedConfigCategoriasRoute
   '/_authenticated/config/meios-pagamento': typeof AuthenticatedConfigMeiosPagamentoRoute
+  '/_authenticated/config/permissoes': typeof AuthenticatedConfigPermissoesRoute
+  '/_authenticated/config/usuarios': typeof AuthenticatedConfigUsuariosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -193,6 +213,8 @@ export interface FileRouteTypes {
     | '/config/bancos'
     | '/config/categorias'
     | '/config/meios-pagamento'
+    | '/config/permissoes'
+    | '/config/usuarios'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -211,6 +233,8 @@ export interface FileRouteTypes {
     | '/config/bancos'
     | '/config/categorias'
     | '/config/meios-pagamento'
+    | '/config/permissoes'
+    | '/config/usuarios'
   id:
     | '__root__'
     | '/'
@@ -230,6 +254,8 @@ export interface FileRouteTypes {
     | '/_authenticated/config/bancos'
     | '/_authenticated/config/categorias'
     | '/_authenticated/config/meios-pagamento'
+    | '/_authenticated/config/permissoes'
+    | '/_authenticated/config/usuarios'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -338,6 +364,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClientesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/config/usuarios': {
+      id: '/_authenticated/config/usuarios'
+      path: '/config/usuarios'
+      fullPath: '/config/usuarios'
+      preLoaderRoute: typeof AuthenticatedConfigUsuariosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/config/permissoes': {
+      id: '/_authenticated/config/permissoes'
+      path: '/config/permissoes'
+      fullPath: '/config/permissoes'
+      preLoaderRoute: typeof AuthenticatedConfigPermissoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/config/meios-pagamento': {
       id: '/_authenticated/config/meios-pagamento'
       path: '/config/meios-pagamento'
@@ -377,6 +417,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedConfigBancosRoute: typeof AuthenticatedConfigBancosRoute
   AuthenticatedConfigCategoriasRoute: typeof AuthenticatedConfigCategoriasRoute
   AuthenticatedConfigMeiosPagamentoRoute: typeof AuthenticatedConfigMeiosPagamentoRoute
+  AuthenticatedConfigPermissoesRoute: typeof AuthenticatedConfigPermissoesRoute
+  AuthenticatedConfigUsuariosRoute: typeof AuthenticatedConfigUsuariosRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -395,6 +437,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedConfigCategoriasRoute: AuthenticatedConfigCategoriasRoute,
   AuthenticatedConfigMeiosPagamentoRoute:
     AuthenticatedConfigMeiosPagamentoRoute,
+  AuthenticatedConfigPermissoesRoute: AuthenticatedConfigPermissoesRoute,
+  AuthenticatedConfigUsuariosRoute: AuthenticatedConfigUsuariosRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
