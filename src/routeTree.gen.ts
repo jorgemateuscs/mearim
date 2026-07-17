@@ -16,6 +16,7 @@ import { Route as AuthenticatedVendasRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedServicosRouteImport } from './routes/_authenticated/servicos'
 import { Route as AuthenticatedProfissionaisRouteImport } from './routes/_authenticated/profissionais'
 import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
+import { Route as AuthenticatedInventarioRouteImport } from './routes/_authenticated/inventario'
 import { Route as AuthenticatedFinanceiroRouteImport } from './routes/_authenticated/financeiro'
 import { Route as AuthenticatedEstoqueRouteImport } from './routes/_authenticated/estoque'
 import { Route as AuthenticatedConciliacaoRouteImport } from './routes/_authenticated/conciliacao'
@@ -56,6 +57,11 @@ const AuthenticatedPainelRoute = AuthenticatedPainelRouteImport.update({
   path: '/painel',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedInventarioRoute = AuthenticatedInventarioRouteImport.update({
+  id: '/inventario',
+  path: '/inventario',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedFinanceiroRoute = AuthenticatedFinanceiroRouteImport.update({
   id: '/financeiro',
   path: '/financeiro',
@@ -85,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/conciliacao': typeof AuthenticatedConciliacaoRoute
   '/estoque': typeof AuthenticatedEstoqueRoute
   '/financeiro': typeof AuthenticatedFinanceiroRoute
+  '/inventario': typeof AuthenticatedInventarioRoute
   '/painel': typeof AuthenticatedPainelRoute
   '/profissionais': typeof AuthenticatedProfissionaisRoute
   '/servicos': typeof AuthenticatedServicosRoute
@@ -97,6 +104,7 @@ export interface FileRoutesByTo {
   '/conciliacao': typeof AuthenticatedConciliacaoRoute
   '/estoque': typeof AuthenticatedEstoqueRoute
   '/financeiro': typeof AuthenticatedFinanceiroRoute
+  '/inventario': typeof AuthenticatedInventarioRoute
   '/painel': typeof AuthenticatedPainelRoute
   '/profissionais': typeof AuthenticatedProfissionaisRoute
   '/servicos': typeof AuthenticatedServicosRoute
@@ -111,6 +119,7 @@ export interface FileRoutesById {
   '/_authenticated/conciliacao': typeof AuthenticatedConciliacaoRoute
   '/_authenticated/estoque': typeof AuthenticatedEstoqueRoute
   '/_authenticated/financeiro': typeof AuthenticatedFinanceiroRoute
+  '/_authenticated/inventario': typeof AuthenticatedInventarioRoute
   '/_authenticated/painel': typeof AuthenticatedPainelRoute
   '/_authenticated/profissionais': typeof AuthenticatedProfissionaisRoute
   '/_authenticated/servicos': typeof AuthenticatedServicosRoute
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
     | '/conciliacao'
     | '/estoque'
     | '/financeiro'
+    | '/inventario'
     | '/painel'
     | '/profissionais'
     | '/servicos'
@@ -137,6 +147,7 @@ export interface FileRouteTypes {
     | '/conciliacao'
     | '/estoque'
     | '/financeiro'
+    | '/inventario'
     | '/painel'
     | '/profissionais'
     | '/servicos'
@@ -150,6 +161,7 @@ export interface FileRouteTypes {
     | '/_authenticated/conciliacao'
     | '/_authenticated/estoque'
     | '/_authenticated/financeiro'
+    | '/_authenticated/inventario'
     | '/_authenticated/painel'
     | '/_authenticated/profissionais'
     | '/_authenticated/servicos'
@@ -213,6 +225,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPainelRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/inventario': {
+      id: '/_authenticated/inventario'
+      path: '/inventario'
+      fullPath: '/inventario'
+      preLoaderRoute: typeof AuthenticatedInventarioRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/financeiro': {
       id: '/_authenticated/financeiro'
       path: '/financeiro'
@@ -249,6 +268,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedConciliacaoRoute: typeof AuthenticatedConciliacaoRoute
   AuthenticatedEstoqueRoute: typeof AuthenticatedEstoqueRoute
   AuthenticatedFinanceiroRoute: typeof AuthenticatedFinanceiroRoute
+  AuthenticatedInventarioRoute: typeof AuthenticatedInventarioRoute
   AuthenticatedPainelRoute: typeof AuthenticatedPainelRoute
   AuthenticatedProfissionaisRoute: typeof AuthenticatedProfissionaisRoute
   AuthenticatedServicosRoute: typeof AuthenticatedServicosRoute
@@ -260,6 +280,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedConciliacaoRoute: AuthenticatedConciliacaoRoute,
   AuthenticatedEstoqueRoute: AuthenticatedEstoqueRoute,
   AuthenticatedFinanceiroRoute: AuthenticatedFinanceiroRoute,
+  AuthenticatedInventarioRoute: AuthenticatedInventarioRoute,
   AuthenticatedPainelRoute: AuthenticatedPainelRoute,
   AuthenticatedProfissionaisRoute: AuthenticatedProfissionaisRoute,
   AuthenticatedServicosRoute: AuthenticatedServicosRoute,
