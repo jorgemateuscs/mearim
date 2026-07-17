@@ -87,6 +87,7 @@ function ContasPagar() {
         status: v.status || "pendente",
         forma_pagamento: v.forma_pagamento || null,
         local_saida: v.local_saida || null,
+        banco_id: v.banco_id || null,
         observacao: v.observacao || null,
       };
       if (editing?.id) {
