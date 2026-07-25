@@ -41,42 +41,6 @@ export type Database = {
         }
         Relationships: []
       }
-      categorias: {
-        Row: {
-          ativo: boolean
-          created_at: string
-          descricao: string | null
-          id: string
-          nome: string
-          tipo: Database["public"]["Enums"]["categoria_tipo"]
-          updated_at: string
-          updated_by: string | null
-          user_id: string
-        }
-        Insert: {
-          ativo?: boolean
-          created_at?: string
-          descricao?: string | null
-          id?: string
-          nome: string
-          tipo: Database["public"]["Enums"]["categoria_tipo"]
-          updated_at?: string
-          updated_by?: string | null
-          user_id: string
-        }
-        Update: {
-          ativo?: boolean
-          created_at?: string
-          descricao?: string | null
-          id?: string
-          nome?: string
-          tipo?: Database["public"]["Enums"]["categoria_tipo"]
-          updated_at?: string
-          updated_by?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
       clientes: {
         Row: {
           contato: string | null
@@ -135,7 +99,6 @@ export type Database = {
         Row: {
           banco_id: string | null
           categoria: string | null
-          categoria_id: string | null
           created_at: string
           data_pagamento: string | null
           data_vencimento: string
@@ -143,13 +106,9 @@ export type Database = {
           forma_pagamento: string | null
           id: string
           local_saida: string | null
-          meio_pagamento_id: string | null
           observacao: string | null
-          origem_id: string | null
-          origem_tipo: Database["public"]["Enums"]["movimentacao_origem"] | null
           status: string
           updated_at: string
-          updated_by: string | null
           user_id: string
           valor_pago: number | null
           valor_previsto: number
@@ -157,7 +116,6 @@ export type Database = {
         Insert: {
           banco_id?: string | null
           categoria?: string | null
-          categoria_id?: string | null
           created_at?: string
           data_pagamento?: string | null
           data_vencimento: string
@@ -165,15 +123,9 @@ export type Database = {
           forma_pagamento?: string | null
           id?: string
           local_saida?: string | null
-          meio_pagamento_id?: string | null
           observacao?: string | null
-          origem_id?: string | null
-          origem_tipo?:
-            | Database["public"]["Enums"]["movimentacao_origem"]
-            | null
           status?: string
           updated_at?: string
-          updated_by?: string | null
           user_id: string
           valor_pago?: number | null
           valor_previsto?: number
@@ -181,7 +133,6 @@ export type Database = {
         Update: {
           banco_id?: string | null
           categoria?: string | null
-          categoria_id?: string | null
           created_at?: string
           data_pagamento?: string | null
           data_vencimento?: string
@@ -189,15 +140,9 @@ export type Database = {
           forma_pagamento?: string | null
           id?: string
           local_saida?: string | null
-          meio_pagamento_id?: string | null
           observacao?: string | null
-          origem_id?: string | null
-          origem_tipo?:
-            | Database["public"]["Enums"]["movimentacao_origem"]
-            | null
           status?: string
           updated_at?: string
-          updated_by?: string | null
           user_id?: string
           valor_pago?: number | null
           valor_previsto?: number
@@ -210,26 +155,11 @@ export type Database = {
             referencedRelation: "bancos"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "contas_pagar_categoria_id_fkey"
-            columns: ["categoria_id"]
-            isOneToOne: false
-            referencedRelation: "categorias"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "contas_pagar_meio_pagamento_id_fkey"
-            columns: ["meio_pagamento_id"]
-            isOneToOne: false
-            referencedRelation: "meios_pagamento"
-            referencedColumns: ["id"]
-          },
         ]
       }
       contas_receber: {
         Row: {
           banco_id: string | null
-          categoria_id: string | null
           cliente_id: string | null
           contato: string | null
           cpf_cnpj: string | null
@@ -240,22 +170,17 @@ export type Database = {
           descricao: string
           id: string
           local_recebimento: string | null
-          meio_pagamento_id: string | null
           observacao: string | null
-          origem_id: string | null
-          origem_tipo: Database["public"]["Enums"]["movimentacao_origem"] | null
           pagador_nome: string | null
           parcela: string | null
           status: string
           updated_at: string
-          updated_by: string | null
           user_id: string
           valor_parcela: number
           valor_recebido: number | null
         }
         Insert: {
           banco_id?: string | null
-          categoria_id?: string | null
           cliente_id?: string | null
           contato?: string | null
           cpf_cnpj?: string | null
@@ -266,24 +191,17 @@ export type Database = {
           descricao: string
           id?: string
           local_recebimento?: string | null
-          meio_pagamento_id?: string | null
           observacao?: string | null
-          origem_id?: string | null
-          origem_tipo?:
-            | Database["public"]["Enums"]["movimentacao_origem"]
-            | null
           pagador_nome?: string | null
           parcela?: string | null
           status?: string
           updated_at?: string
-          updated_by?: string | null
           user_id: string
           valor_parcela?: number
           valor_recebido?: number | null
         }
         Update: {
           banco_id?: string | null
-          categoria_id?: string | null
           cliente_id?: string | null
           contato?: string | null
           cpf_cnpj?: string | null
@@ -294,17 +212,11 @@ export type Database = {
           descricao?: string
           id?: string
           local_recebimento?: string | null
-          meio_pagamento_id?: string | null
           observacao?: string | null
-          origem_id?: string | null
-          origem_tipo?:
-            | Database["public"]["Enums"]["movimentacao_origem"]
-            | null
           pagador_nome?: string | null
           parcela?: string | null
           status?: string
           updated_at?: string
-          updated_by?: string | null
           user_id?: string
           valor_parcela?: number
           valor_recebido?: number | null
@@ -318,160 +230,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "contas_receber_categoria_id_fkey"
-            columns: ["categoria_id"]
-            isOneToOne: false
-            referencedRelation: "categorias"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "contas_receber_cliente_id_fkey"
             columns: ["cliente_id"]
             isOneToOne: false
             referencedRelation: "clientes"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "contas_receber_meio_pagamento_id_fkey"
-            columns: ["meio_pagamento_id"]
-            isOneToOne: false
-            referencedRelation: "meios_pagamento"
-            referencedColumns: ["id"]
-          },
         ]
-      }
-      equipamentos: {
-        Row: {
-          ativo: boolean
-          banco_id: string | null
-          categoria_id: string | null
-          created_at: string
-          data_compra: string | null
-          fornecedor_id: string | null
-          id: string
-          marca: string | null
-          modelo: string | null
-          nome: string
-          numero_serie: string | null
-          observacao: string | null
-          situacao: string | null
-          status_pagamento: Database["public"]["Enums"]["status_pagamento"]
-          updated_at: string
-          updated_by: string | null
-          user_id: string
-          valor: number
-          valor_pago: number
-        }
-        Insert: {
-          ativo?: boolean
-          banco_id?: string | null
-          categoria_id?: string | null
-          created_at?: string
-          data_compra?: string | null
-          fornecedor_id?: string | null
-          id?: string
-          marca?: string | null
-          modelo?: string | null
-          nome: string
-          numero_serie?: string | null
-          observacao?: string | null
-          situacao?: string | null
-          status_pagamento?: Database["public"]["Enums"]["status_pagamento"]
-          updated_at?: string
-          updated_by?: string | null
-          user_id: string
-          valor?: number
-          valor_pago?: number
-        }
-        Update: {
-          ativo?: boolean
-          banco_id?: string | null
-          categoria_id?: string | null
-          created_at?: string
-          data_compra?: string | null
-          fornecedor_id?: string | null
-          id?: string
-          marca?: string | null
-          modelo?: string | null
-          nome?: string
-          numero_serie?: string | null
-          observacao?: string | null
-          situacao?: string | null
-          status_pagamento?: Database["public"]["Enums"]["status_pagamento"]
-          updated_at?: string
-          updated_by?: string | null
-          user_id?: string
-          valor?: number
-          valor_pago?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "equipamentos_banco_id_fkey"
-            columns: ["banco_id"]
-            isOneToOne: false
-            referencedRelation: "bancos"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "equipamentos_categoria_id_fkey"
-            columns: ["categoria_id"]
-            isOneToOne: false
-            referencedRelation: "categorias"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "equipamentos_fornecedor_id_fkey"
-            columns: ["fornecedor_id"]
-            isOneToOne: false
-            referencedRelation: "fornecedores"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      fornecedores: {
-        Row: {
-          ativo: boolean
-          contato: string | null
-          created_at: string
-          documento: string | null
-          email: string | null
-          endereco: string | null
-          id: string
-          nome: string
-          observacao: string | null
-          updated_at: string
-          updated_by: string | null
-          user_id: string
-        }
-        Insert: {
-          ativo?: boolean
-          contato?: string | null
-          created_at?: string
-          documento?: string | null
-          email?: string | null
-          endereco?: string | null
-          id?: string
-          nome: string
-          observacao?: string | null
-          updated_at?: string
-          updated_by?: string | null
-          user_id: string
-        }
-        Update: {
-          ativo?: boolean
-          contato?: string | null
-          created_at?: string
-          documento?: string | null
-          email?: string | null
-          endereco?: string | null
-          id?: string
-          nome?: string
-          observacao?: string | null
-          updated_at?: string
-          updated_by?: string | null
-          user_id?: string
-        }
-        Relationships: []
       }
       inventario: {
         Row: {
@@ -523,118 +288,6 @@ export type Database = {
           valor_total?: number
         }
         Relationships: []
-      }
-      meios_pagamento: {
-        Row: {
-          ativo: boolean
-          created_at: string
-          id: string
-          nome: string
-          updated_at: string
-          updated_by: string | null
-          user_id: string
-        }
-        Insert: {
-          ativo?: boolean
-          created_at?: string
-          id?: string
-          nome: string
-          updated_at?: string
-          updated_by?: string | null
-          user_id: string
-        }
-        Update: {
-          ativo?: boolean
-          created_at?: string
-          id?: string
-          nome?: string
-          updated_at?: string
-          updated_by?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
-      pecas: {
-        Row: {
-          ativo: boolean
-          banco_id: string | null
-          categoria_id: string | null
-          created_at: string
-          data_compra: string | null
-          fornecedor_id: string | null
-          id: string
-          nome: string
-          observacao: string | null
-          quantidade: number
-          status_pagamento: Database["public"]["Enums"]["status_pagamento"]
-          updated_at: string
-          updated_by: string | null
-          user_id: string
-          valor_pago: number
-          valor_total: number
-          valor_unitario: number
-        }
-        Insert: {
-          ativo?: boolean
-          banco_id?: string | null
-          categoria_id?: string | null
-          created_at?: string
-          data_compra?: string | null
-          fornecedor_id?: string | null
-          id?: string
-          nome: string
-          observacao?: string | null
-          quantidade?: number
-          status_pagamento?: Database["public"]["Enums"]["status_pagamento"]
-          updated_at?: string
-          updated_by?: string | null
-          user_id: string
-          valor_pago?: number
-          valor_total?: number
-          valor_unitario?: number
-        }
-        Update: {
-          ativo?: boolean
-          banco_id?: string | null
-          categoria_id?: string | null
-          created_at?: string
-          data_compra?: string | null
-          fornecedor_id?: string | null
-          id?: string
-          nome?: string
-          observacao?: string | null
-          quantidade?: number
-          status_pagamento?: Database["public"]["Enums"]["status_pagamento"]
-          updated_at?: string
-          updated_by?: string | null
-          user_id?: string
-          valor_pago?: number
-          valor_total?: number
-          valor_unitario?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pecas_banco_id_fkey"
-            columns: ["banco_id"]
-            isOneToOne: false
-            referencedRelation: "bancos"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pecas_categoria_id_fkey"
-            columns: ["categoria_id"]
-            isOneToOne: false
-            referencedRelation: "categorias"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pecas_fornecedor_id_fkey"
-            columns: ["fornecedor_id"]
-            isOneToOne: false
-            referencedRelation: "fornecedores"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       produtos: {
         Row: {
@@ -837,27 +490,6 @@ export type Database = {
           },
         ]
       }
-      user_roles: {
-        Row: {
-          created_at: string
-          id: string
-          role: Database["public"]["Enums"]["app_role"]
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          role: Database["public"]["Enums"]["app_role"]
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          role?: Database["public"]["Enums"]["app_role"]
-          user_id?: string
-        }
-        Relationships: []
-      }
       vendas_produtos: {
         Row: {
           cliente_id: string | null
@@ -1005,50 +637,13 @@ export type Database = {
       }
     }
     Views: {
-      movimentacoes_bancarias: {
-        Row: {
-          banco_id: string | null
-          categoria_id: string | null
-          data_mov: string | null
-          descricao: string | null
-          id: string | null
-          meio_pagamento_id: string | null
-          origem_id: string | null
-          origem_tipo: Database["public"]["Enums"]["movimentacao_origem"] | null
-          tipo: string | null
-          user_id: string | null
-          valor: number | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
+      [_ in never]: never
     }
     Enums: {
-      app_role: "admin" | "financeiro" | "operador" | "leitura"
-      categoria_tipo:
-        | "despesa"
-        | "receita"
-        | "patrimonio"
-        | "servico"
-        | "estoque"
-      movimentacao_origem:
-        | "conta_pagar"
-        | "conta_receber"
-        | "transferencia"
-        | "venda_produto"
-        | "venda_servico"
-        | "equipamento"
-        | "peca"
-        | "ajuste"
-      status_pagamento: "pago" | "parcial" | "pendente"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1175,26 +770,6 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {
-      app_role: ["admin", "financeiro", "operador", "leitura"],
-      categoria_tipo: [
-        "despesa",
-        "receita",
-        "patrimonio",
-        "servico",
-        "estoque",
-      ],
-      movimentacao_origem: [
-        "conta_pagar",
-        "conta_receber",
-        "transferencia",
-        "venda_produto",
-        "venda_servico",
-        "equipamento",
-        "peca",
-        "ajuste",
-      ],
-      status_pagamento: ["pago", "parcial", "pendente"],
-    },
+    Enums: {},
   },
 } as const
