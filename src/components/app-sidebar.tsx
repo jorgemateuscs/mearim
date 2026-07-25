@@ -1,4 +1,7 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
+import { checkIsAdmin } from "@/lib/users.functions";
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -9,6 +12,7 @@ import {
   Package,
   Landmark,
   Boxes,
+  Shield,
   LogOut,
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -45,6 +49,9 @@ export function AppSidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const check = useServerFn(checkIsAdmin);
+  const adminQ = useQuery({ queryKey: ["is-admin"], queryFn: () => check() });
+  const isAdmin = !!adminQ.data?.isAdmin;
 
   const isActive = (url: string) => pathname === url || pathname.startsWith(url + "/");
 
@@ -86,6 +93,16 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              {isAdmin && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/usuarios")} tooltip="Usuários">
+                    <Link to="/usuarios">
+                      <Shield />
+                      <span>Usuários</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
