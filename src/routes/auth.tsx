@@ -22,10 +22,8 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const navigate = useNavigate();
   const { redirect } = useSearch({ from: "/auth" });
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [nome, setNome] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -38,17 +36,8 @@ function AuthPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
-          email, password,
-          options: { emailRedirectTo: window.location.origin, data: { full_name: nome } },
-        });
-        if (error) throw error;
-        toast.success("Conta criada! Bem-vindo(a).");
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-      }
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
       navigate({ to: (redirect as string) || "/painel", replace: true });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Falha na autenticação");
@@ -84,28 +73,20 @@ function AuthPage() {
           </div>
         </div>
 
-        <h2 className="text-2xl font-semibold mb-1">{mode === "signin" ? "Entrar" : "Criar conta"}</h2>
-        <p className="text-sm text-muted-foreground mb-6">
-          {mode === "signin" ? "Acesse seu painel de gestão" : "Comece a organizar seu negócio hoje"}
-        </p>
+        <h2 className="text-2xl font-semibold mb-1">Entrar</h2>
+        <p className="text-sm text-muted-foreground mb-6">Acesse seu painel de gestão</p>
 
         <form onSubmit={onSubmit} className="space-y-4">
-          {mode === "signup" && (
-            <div>
-              <Label htmlFor="nome">Seu nome</Label>
-              <Input id="nome" value={nome} onChange={(e) => setNome(e.target.value)} required />
-            </div>
-          )}
           <div>
             <Label htmlFor="email">E-mail</Label>
             <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
           </div>
           <div>
             <Label htmlFor="password">Senha</Label>
-            <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} autoComplete={mode === "signin" ? "current-password" : "new-password"} />
+            <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} autoComplete="current-password" />
           </div>
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "..." : mode === "signin" ? "Entrar" : "Criar conta"}
+            {loading ? "..." : "Entrar"}
           </Button>
         </form>
 
@@ -119,11 +100,8 @@ function AuthPage() {
           Continuar com Google
         </Button>
 
-        <p className="text-center text-sm text-muted-foreground mt-6">
-          {mode === "signin" ? "Não tem uma conta? " : "Já tem uma conta? "}
-          <button type="button" className="text-primary hover:underline font-medium" onClick={() => setMode(mode === "signin" ? "signup" : "signin")}>
-            {mode === "signin" ? "Criar conta" : "Entrar"}
-          </button>
+        <p className="text-center text-xs text-muted-foreground mt-6">
+          Acesso restrito. Apenas usuários cadastrados pelo administrador podem entrar.
         </p>
       </Card>
     </div>
