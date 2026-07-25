@@ -37,7 +37,7 @@ export const listUsers = createServerFn({ method: "GET" })
 const createSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
-  role: z.enum(["admin", "moderator", "user"]),
+  role: z.enum(["admin", "financeiro", "operador", "leitura"]),
 });
 
 export const createUser = createServerFn({ method: "POST" })
