@@ -1,30 +1,31 @@
 
-## Objetivo
-Ver o saldo de cada banco separadamente na tela **Conciliação Bancária**, com saldo inicial, entradas, saídas e saldo atual próprios — além do consolidado.
+# Tela de admin para cadastrar usuários
 
-## Mudanças no banco
-Hoje `contas_pagar` e `contas_receber` não têm vínculo com banco, então não é possível saber em qual conta o dinheiro entrou/saiu. Migration para adicionar:
-- `contas_pagar.banco_id` (uuid, FK → bancos, nullable)
-- `contas_receber.banco_id` (uuid, FK → bancos, nullable)
+Cria uma página **Configurações › Usuários** onde só administradores conseguem criar novos usuários (e-mail + senha), listar e remover — sem precisar reabrir o cadastro público.
 
-Contas antigas ficam sem banco (não entram no cálculo por banco, mas continuam no consolidado).
+## O que muda
 
-## Mudanças na UI (`src/routes/_authenticated/conciliacao.tsx`)
+### Backend
+- **Server function** `createUser` (protegida por `requireSupabaseAuth`):
+  - Verifica se o chamador tem `has_role(admin)`. Se não, retorna 403.
+  - Usa `supabaseAdmin.auth.admin.createUser({ email, password, email_confirm: true })` para criar a conta já confirmada.
+  - Insere `user_roles` (papel escolhido: `admin` ou `user`).
+- **Server function** `listUsers` e `deleteUser` (também admin-only) para listar contas em `auth.users` e apagar.
+- **Primeiro admin**: como ninguém é admin ainda, incluo uma migration que promove o seu usuário atual a `admin` em `user_roles`. Preciso do e-mail do seu login para isso.
 
-1. **Seletor de banco** no topo da página: "Todos os bancos" + um item por banco cadastrado.
+### Frontend
+- Novo item no menu **Configurações › Usuários** (visível só para admin, usando `has_role`).
+- Rota `src/routes/_authenticated/usuarios.tsx`:
+  - Lista de usuários (e-mail, papel, criado em).
+  - Botão **Novo usuário** abre modal com e-mail, senha, papel (Admin/Usuário).
+  - Botão de excluir por linha (confirmação).
+- Guarda de rota: se o usuário logado não for admin, redireciona para `/painel`.
 
-2. **Cards de resumo** passam a refletir o banco selecionado:
-   - Saldo inicial (do banco, ou soma se "Todos")
-   - Entradas recebidas (contas_receber `recebido` com `banco_id` = filtro) + transferências recebidas
-   - Saídas pagas (contas_pagar `pago` com `banco_id` = filtro) + transferências enviadas
-   - Saldo atual = inicial + entradas − saídas
+## Passo a passo depois de pronto
+1. Fazer login com seu usuário (já promovido a admin pela migration).
+2. Menu → **Configurações › Usuários** → **Novo usuário**.
+3. Preencher e-mail, senha e papel → **Salvar**.
+4. Passar as credenciais ao novo usuário; ele entra direto em `/auth`.
 
-3. **Nova aba "Saldos por banco"**: tabela com uma linha por banco mostrando as 4 colunas (inicial, entradas, saídas, atual) — visão comparativa rápida.
-
-4. **Aba Transferências**: adiciona filtro pelo banco selecionado (mostra transferências onde ele é origem ou destino).
-
-5. Formulários de **contas a pagar/receber** (em `financeiro.tsx`) ganham campo opcional "Banco" para que futuras movimentações sejam atribuíveis. *(Somente o select; nenhuma outra lógica muda.)*
-
-## Fora do escopo
-- Não altero o comportamento de vendas/estoque.
-- Contas antigas sem `banco_id` não são migradas automaticamente (usuário pode editar se quiser).
+## Pergunta que preciso responder antes de construir
+Qual é o **e-mail da sua conta atual** (a que vai virar admin na migration)?
