@@ -109,7 +109,7 @@ export function CrudPage({ title, description, table, fields, searchKey }: Props
             <DialogTrigger asChild>
               <Button><Plus className="h-4 w-4 mr-1" /> Novo</Button>
             </DialogTrigger>
-            <FormDialog fields={fields} editing={editing} onSubmit={(p) => upsert.mutate(p)} loading={upsert.isPending} />
+            <FormDialog key={editing?.id ?? "new"} fields={fields} editing={editing} onSubmit={(p) => upsert.mutate(p)} loading={upsert.isPending} />
           </Dialog>
         </div>
       </header>

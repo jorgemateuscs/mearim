@@ -41,6 +41,7 @@ function InventarioPage() {
   const [editing, setEditing] = useState<any | null>(null);
   const [filtroCat, setFiltroCat] = useState<string>("todas");
   const [filtroStatus, setFiltroStatus] = useState<string>("todos");
+  const [detalhe, setDetalhe] = useState<any | null>(null);
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["inventario"],
@@ -132,8 +133,8 @@ function InventarioPage() {
           </Select>
         </div>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setEditing(null); }}>
-          <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-1" />Novo item</Button></DialogTrigger>
-          <InventarioForm editing={editing} onSubmit={(p) => save.mutate(p)} loading={save.isPending} />
+          <DialogTrigger asChild><Button onClick={() => setEditing(null)}><Plus className="h-4 w-4 mr-1" />Novo item</Button></DialogTrigger>
+          <InventarioForm key={editing?.id ?? "new"} editing={editing} onSubmit={(p) => save.mutate(p)} loading={save.isPending} />
         </Dialog>
       </div>
 
@@ -160,7 +161,7 @@ function InventarioPage() {
                 const info = statusInfo(r.status_pagamento);
                 const restante = Number(r.valor_total ?? 0) - Number(r.valor_pago ?? 0);
                 return (
-                  <TableRow key={r.id}>
+                  <TableRow key={r.id} className="cursor-pointer" onClick={() => setDetalhe(r)}>
                     <TableCell className="font-medium">{r.nome}</TableCell>
                     <TableCell>{categoriaLabel(r.categoria)}</TableCell>
                     <TableCell>{r.data_aquisicao ? formatDate(r.data_aquisicao) : "—"}</TableCell>
@@ -169,7 +170,7 @@ function InventarioPage() {
                     <TableCell className="text-right text-emerald-500">{formatBRL(Number(r.valor_pago))}</TableCell>
                     <TableCell className="text-right text-amber-500">{formatBRL(restante)}</TableCell>
                     <TableCell><Badge variant="outline" className={info.cls}>{info.label}</Badge></TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                       <div className="flex justify-end gap-1">
                         <Button size="icon" variant="ghost" onClick={() => { setEditing(r); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
                         <AlertDialog>
@@ -188,6 +189,39 @@ function InventarioPage() {
           </Table>
         </div>
       </Card>
+
+      <Dialog open={!!detalhe} onOpenChange={(v) => { if (!v) setDetalhe(null); }}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>{detalhe?.nome}</DialogTitle></DialogHeader>
+          {detalhe && (
+            <div className="space-y-2 text-sm">
+              <Info label="Categoria" value={categoriaLabel(detalhe.categoria)} />
+              <Info label="Data de aquisição" value={detalhe.data_aquisicao ? formatDate(detalhe.data_aquisicao) : "—"} />
+              <Info label="Quantidade" value={String(Number(detalhe.quantidade ?? 0))} />
+              <Info label="Fornecedor" value={detalhe.fornecedor || "—"} />
+              <Info label="Valor total" value={formatBRL(Number(detalhe.valor_total ?? 0))} />
+              <Info label="Valor pago" value={formatBRL(Number(detalhe.valor_pago ?? 0))} />
+              <Info label="Valor restante" value={formatBRL(Number(detalhe.valor_total ?? 0) - Number(detalhe.valor_pago ?? 0))} />
+              <Info label="Status" value={statusInfo(detalhe.status_pagamento).label} />
+              <Info label="Descrição" value={detalhe.descricao || "—"} />
+              <Info label="Observações" value={detalhe.observacao || "—"} />
+              <DialogFooter className="pt-2">
+                <Button variant="outline" onClick={() => setDetalhe(null)}>Fechar</Button>
+                <Button onClick={() => { setEditing(detalhe); setDetalhe(null); setOpen(true); }}>Editar</Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function Info({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between gap-4 border-b border-border/50 pb-1">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-medium text-right">{value}</span>
     </div>
   );
 }
