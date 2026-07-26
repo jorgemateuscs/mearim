@@ -510,13 +510,3 @@ function Info({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
-
-function StatUnused({ label, value, tone }: { label: string; value: string; tone?: "ok" | "warn" }) {
-  const cls = tone === "ok" ? "text-emerald-500" : tone === "warn" ? "text-amber-500" : "";
-  return (
-    <Card className="p-4">
-      <div className="text-xs uppercase tracking-wider text-muted-foreground">{label}</div>
-      <div className={`text-xl font-semibold mt-1 ${cls}`}>{value}</div>
-    </Card>
-  );
-}
