@@ -272,11 +272,12 @@ function ContasReceber() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("todos");
+  const [detalhe, setDetalhe] = useState<any | null>(null);
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["contas_receber_full"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("contas_receber").select("*, clientes(nome)").order("data_vencimento", { ascending: false });
+      const { data, error } = await supabase.from("contas_receber").select("*, clientes(nome), bancos(nome)").order("data_vencimento", { ascending: false });
       if (error) throw error;
       return data as any[];
     },
@@ -356,8 +357,8 @@ function ContasReceber() {
             </SelectContent>
           </Select>
           <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setEditing(null); }}>
-            <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-1" />Nova conta</Button></DialogTrigger>
-            <ReceberForm editing={editing} onSubmit={(p) => save.mutate(p)} loading={save.isPending} />
+            <DialogTrigger asChild><Button onClick={() => setEditing(null)}><Plus className="h-4 w-4 mr-1" />Nova conta</Button></DialogTrigger>
+            <ReceberForm key={editing?.id ?? "new"} editing={editing} onSubmit={(p) => save.mutate(p)} loading={save.isPending} />
           </Dialog>
         </div>
       </div>
@@ -383,7 +384,7 @@ function ContasReceber() {
               {filtered.map((r) => {
                 const info = statusInfo(r.status);
                 return (
-                  <TableRow key={r.id}>
+                  <TableRow key={r.id} className="cursor-pointer" onClick={() => setDetalhe(r)}>
                     <TableCell>{r.clientes?.nome ?? r.pagador_nome ?? "—"}</TableCell>
                     <TableCell className="font-medium">{r.descricao}</TableCell>
                     <TableCell>{r.parcela ?? "—"}</TableCell>
@@ -391,7 +392,7 @@ function ContasReceber() {
                     <TableCell className="text-right">{formatBRL(Number(r.valor_parcela))}</TableCell>
                     <TableCell className="text-right">{r.valor_recebido != null ? formatBRL(Number(r.valor_recebido)) : "—"}</TableCell>
                     <TableCell><Badge variant="outline" className={info.cls}>{info.label}</Badge></TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                       <div className="flex justify-end gap-1">
                         {r.status !== "recebido" && (
                           <Button size="icon" variant="ghost" title="Marcar como recebida" onClick={() => receber.mutate(r)}><CheckCircle2 className="h-4 w-4 text-emerald-500" /></Button>
@@ -413,6 +414,32 @@ function ContasReceber() {
           </Table>
         </div>
       </Card>
+
+      <Dialog open={!!detalhe} onOpenChange={(v) => { if (!v) setDetalhe(null); }}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>{detalhe?.descricao}</DialogTitle></DialogHeader>
+          {detalhe && (
+            <div className="space-y-2 text-sm">
+              <Info label="Cliente/Pagador" value={detalhe.clientes?.nome || detalhe.pagador_nome || "—"} />
+              <Info label="Contato" value={detalhe.contato || "—"} />
+              <Info label="CPF/CNPJ" value={detalhe.cpf_cnpj || "—"} />
+              <Info label="Data da venda" value={detalhe.data_venda ? formatDate(detalhe.data_venda) : "—"} />
+              <Info label="Parcela" value={detalhe.parcela || "—"} />
+              <Info label="Vencimento" value={formatDate(detalhe.data_vencimento)} />
+              <Info label="Valor da parcela" value={formatBRL(Number(detalhe.valor_parcela ?? 0))} />
+              <Info label="Data de recebimento" value={detalhe.data_recebimento ? formatDate(detalhe.data_recebimento) : "—"} />
+              <Info label="Valor recebido" value={detalhe.valor_recebido != null ? formatBRL(Number(detalhe.valor_recebido)) : "—"} />
+              <Info label="Banco" value={detalhe.bancos?.nome || "—"} />
+              <Info label="Status" value={statusInfo(detalhe.status).label} />
+              <Info label="Observação" value={detalhe.observacao || "—"} />
+              <DialogFooter className="pt-2">
+                <Button variant="outline" onClick={() => setDetalhe(null)}>Fechar</Button>
+                <Button onClick={() => { setEditing(detalhe); setDetalhe(null); setOpen(true); }}>Editar</Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -466,6 +493,25 @@ function ReceberForm({ editing, onSubmit, loading }: { editing: any | null; onSu
 }
 
 function Stat({ label, value, tone }: { label: string; value: string; tone?: "ok" | "warn" }) {
+  const cls = tone === "ok" ? "text-emerald-500" : tone === "warn" ? "text-amber-500" : "";
+  return (
+    <Card className="p-4">
+      <div className="text-xs uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className={`text-xl font-semibold mt-1 ${cls}`}>{value}</div>
+    </Card>
+  );
+}
+
+function Info({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between gap-4 border-b border-border/50 pb-1">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-medium text-right">{value}</span>
+    </div>
+  );
+}
+
+function StatUnused({ label, value, tone }: { label: string; value: string; tone?: "ok" | "warn" }) {
   const cls = tone === "ok" ? "text-emerald-500" : tone === "warn" ? "text-amber-500" : "";
   return (
     <Card className="p-4">
