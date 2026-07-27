@@ -1,8 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { formatBRL } from "@/lib/format";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { formatBRL, formatDate } from "@/lib/format";
 import {
   TrendingUp,
   TrendingDown,
@@ -22,23 +26,48 @@ export const Route = createFileRoute("/_authenticated/painel")({
 
 const MESES = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
 
+const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+/** Lista de meses (chave YYYY-MM e rótulo) dentro do período */
+function buildMeses(ini: string, fim: string) {
+  const out: { key: string; label: string }[] = [];
+  if (!ini || !fim || ini > fim) return out;
+  const start = new Date(ini + "T00:00:00");
+  const end = new Date(fim + "T00:00:00");
+  const cur = new Date(start.getFullYear(), start.getMonth(), 1);
+  while (cur <= end && out.length < 120) {
+    const key = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, "0")}`;
+    const label = out.length > 0 && cur.getMonth() === 0 ? `${MESES[0]}/${String(cur.getFullYear()).slice(2)}` : MESES[cur.getMonth()];
+    out.push({ key, label });
+    cur.setMonth(cur.getMonth() + 1);
+  }
+  return out;
+}
+
 function PainelPage() {
-  const year = new Date().getFullYear();
-  const startYear = `${year}-01-01`;
-  const endYear = `${year}-12-31`;
-  const today = new Date().toISOString().slice(0, 10);
-  const in7 = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
-  const monthStart = `${year}-${String(new Date().getMonth() + 1).padStart(2, "0")}-01`;
-  const monthEnd = new Date(year, new Date().getMonth() + 1, 0).toISOString().slice(0, 10);
+  const now = new Date();
+  const year = now.getFullYear();
+  const today = iso(now);
+  const in7 = iso(new Date(Date.now() + 7 * 86400000));
+
+  const [dataIni, setDataIni] = useState<string>(`${year}-01-01`);
+  const [dataFim, setDataFim] = useState<string>(`${year}-12-31`);
+
+  const presets = [
+    { label: "Últimos 30 dias", run: () => { setDataIni(iso(new Date(Date.now() - 29 * 86400000))); setDataFim(iso(new Date())); } },
+    { label: "Últimos 365 dias", run: () => { setDataIni(iso(new Date(Date.now() - 364 * 86400000))); setDataFim(iso(new Date())); } },
+    { label: "Mês vigente", run: () => { const d = new Date(); setDataIni(iso(new Date(d.getFullYear(), d.getMonth(), 1))); setDataFim(iso(new Date(d.getFullYear(), d.getMonth() + 1, 0))); } },
+    { label: "Ano vigente", run: () => { const y = new Date().getFullYear(); setDataIni(`${y}-01-01`); setDataFim(`${y}-12-31`); } },
+  ];
 
   const { data, isLoading } = useQuery({
-    queryKey: ["painel", year],
+    queryKey: ["painel", dataIni, dataFim],
     queryFn: async () => {
       const [vp, vs, cp, cr, cli, prod] = await Promise.all([
-        supabase.from("vendas_produtos").select("data_venda,valor_total,custo_total").gte("data_venda", startYear).lte("data_venda", endYear),
-        supabase.from("vendas_servicos").select("data_venda,valor_venda,valor_recebido,custo").gte("data_venda", startYear).lte("data_venda", endYear),
-        supabase.from("contas_pagar").select("data_vencimento,valor_previsto,valor_pago,status,categoria").gte("data_vencimento", startYear).lte("data_vencimento", endYear),
-        supabase.from("contas_receber").select("data_vencimento,valor_parcela,valor_recebido,status").gte("data_vencimento", startYear).lte("data_vencimento", endYear),
+        supabase.from("vendas_produtos").select("data_venda,valor_total,custo_total").gte("data_venda", dataIni).lte("data_venda", dataFim),
+        supabase.from("vendas_servicos").select("data_venda,valor_venda,valor_recebido,custo").gte("data_venda", dataIni).lte("data_venda", dataFim),
+        supabase.from("contas_pagar").select("data_vencimento,valor_previsto,valor_pago,status,categoria").gte("data_vencimento", dataIni).lte("data_vencimento", dataFim),
+        supabase.from("contas_receber").select("data_vencimento,valor_parcela,valor_recebido,status").gte("data_vencimento", dataIni).lte("data_vencimento", dataFim),
         supabase.from("clientes").select("id,data_nascimento,proximo_contato,forma_prospeccao"),
         supabase.from("produtos").select("qtde_adquirida,qtde_vendida,valor_venda,custo_medio"),
       ]);
@@ -59,23 +88,30 @@ function PainelPage() {
   const despesas = (data?.contasPagar ?? []).reduce((s, c) => s + Number(c.valor_pago ?? 0), 0);
   const saldo = faturamento - despesas;
 
-  const receitasMes = Array(12).fill(0);
-  const despesasMes = Array(12).fill(0);
-  const lucroMes = Array(12).fill(0);
-  (data?.vendasProd ?? []).forEach((v) => {
-    const m = new Date(v.data_venda + "T00:00:00").getMonth();
-    receitasMes[m] += Number(v.valor_total ?? 0);
-    lucroMes[m] += Number(v.valor_total ?? 0) - Number(v.custo_total ?? 0);
-  });
-  (data?.vendasServ ?? []).forEach((v) => {
-    const m = new Date(v.data_venda + "T00:00:00").getMonth();
-    receitasMes[m] += Number(v.valor_recebido ?? 0);
-    lucroMes[m] += Number(v.valor_recebido ?? 0) - Number(v.custo ?? 0);
-  });
-  (data?.contasPagar ?? []).forEach((c) => {
-    const m = new Date(c.data_vencimento + "T00:00:00").getMonth();
-    despesasMes[m] += Number(c.valor_pago ?? 0);
-  });
+  const meses = useMemo(() => buildMeses(dataIni, dataFim), [dataIni, dataFim]);
+
+  const { receitasMes, despesasMes, lucroMes } = useMemo(() => {
+    const idx = new Map(meses.map((m, i) => [m.key, i]));
+    const receitas = Array(meses.length).fill(0);
+    const desp = Array(meses.length).fill(0);
+    const lucro = Array(meses.length).fill(0);
+    const at = (d?: string | null) => (d ? idx.get(d.slice(0, 7)) : undefined);
+    (data?.vendasProd ?? []).forEach((v) => {
+      const i = at(v.data_venda); if (i === undefined) return;
+      receitas[i] += Number(v.valor_total ?? 0);
+      lucro[i] += Number(v.valor_total ?? 0) - Number(v.custo_total ?? 0);
+    });
+    (data?.vendasServ ?? []).forEach((v) => {
+      const i = at(v.data_venda); if (i === undefined) return;
+      receitas[i] += Number(v.valor_recebido ?? 0);
+      lucro[i] += Number(v.valor_recebido ?? 0) - Number(v.custo ?? 0);
+    });
+    (data?.contasPagar ?? []).forEach((c) => {
+      const i = at(c.data_vencimento); if (i === undefined) return;
+      desp[i] += Number(c.valor_pago ?? 0);
+    });
+    return { receitasMes: receitas, despesasMes: desp, lucroMes: lucro };
+  }, [data, meses]);
 
   const totalClientes = (data?.clientes ?? []).length;
   const aniversariantes = (data?.clientes ?? []).filter((c) => {
@@ -98,8 +134,33 @@ function PainelPage() {
     <div className="space-y-6">
       <header>
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Painel</h1>
-        <p className="text-sm text-muted-foreground">Visão geral do seu negócio · {year}</p>
+        <p className="text-sm text-muted-foreground">Visão geral do seu negócio</p>
       </header>
+
+      {/* Barra de período */}
+      <Card className="p-4">
+        <div className="flex flex-col xl:flex-row xl:items-end gap-4 xl:justify-between">
+          <div className="flex flex-wrap items-end gap-3">
+            <div>
+              <Label className="text-xs mb-1 block">Data inicial</Label>
+              <Input type="date" className="w-40" value={dataIni} onChange={(e) => setDataIni(e.target.value)} />
+            </div>
+            <div>
+              <Label className="text-xs mb-1 block">Data final</Label>
+              <Input type="date" className="w-40" value={dataFim} onChange={(e) => setDataFim(e.target.value)} />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {presets.map((p) => (
+                <Button key={p.label} type="button" size="sm" variant="outline" onClick={p.run}>{p.label}</Button>
+              ))}
+            </div>
+          </div>
+          <div className="rounded-lg border border-primary/30 bg-primary/5 px-4 py-3">
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Período selecionado</div>
+            <div className="text-sm font-semibold">{formatDate(dataIni)} a {formatDate(dataFim)}</div>
+          </div>
+        </div>
+      </Card>
 
       {/* KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -111,9 +172,9 @@ function PainelPage() {
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <ChartCard title="Faturamento mensal" data={receitasMes} color="var(--color-chart-1)" />
-        <ChartCard title="Despesas mensais" data={despesasMes} color="var(--color-chart-5)" />
-        <ChartCard title="Lucro mensal" data={lucroMes} color="var(--color-chart-2)" />
+        <ChartCard title="Faturamento mensal" data={receitasMes} labels={meses.map((m) => m.label)} color="var(--color-chart-1)" />
+        <ChartCard title="Despesas mensais" data={despesasMes} labels={meses.map((m) => m.label)} color="var(--color-chart-5)" />
+        <ChartCard title="Lucro mensal" data={lucroMes} labels={meses.map((m) => m.label)} color="var(--color-chart-2)" />
       </div>
 
       {/* Clientes + Contas */}
@@ -175,8 +236,8 @@ function StatusRow({ label, count, value, color }: { label: string; count: numbe
   );
 }
 
-function ChartCard({ title, data, color }: { title: string; data: number[]; color: string }) {
-  const chartData = data.map((v, i) => ({ mes: MESES[i], valor: v }));
+function ChartCard({ title, data, labels, color }: { title: string; data: number[]; labels: string[]; color: string }) {
+  const chartData = data.map((v, i) => ({ mes: labels[i] ?? "", valor: v }));
   return (
     <Card className="p-5">
       <div className="text-sm font-medium text-muted-foreground mb-3">{title}</div>
