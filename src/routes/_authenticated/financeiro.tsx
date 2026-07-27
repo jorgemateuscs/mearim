@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -20,26 +20,42 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/financeiro")({
   ssr: false,
+  validateSearch: (search: Record<string, unknown>) => ({
+    tab: typeof search.tab === "string" ? search.tab : undefined,
+    id: typeof search.id === "string" ? search.id : undefined,
+  }),
   component: FinanceiroPage,
 });
 
 function FinanceiroPage() {
+  const { tab, id } = Route.useSearch();
+  const [active, setActive] = useState<string>(tab === "receber" ? "receber" : "pagar");
+  useEffect(() => { if (tab === "receber" || tab === "pagar") setActive(tab); }, [tab]);
   return (
     <div className="space-y-5">
       <header>
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Financeiro</h1>
         <p className="text-sm text-muted-foreground">Contas a pagar e contas a receber.</p>
       </header>
-      <Tabs defaultValue="pagar" className="space-y-4">
+      <Tabs value={active} onValueChange={setActive} className="space-y-4">
         <TabsList>
           <TabsTrigger value="pagar"><ArrowUpCircle className="h-4 w-4 mr-2" />Contas a pagar</TabsTrigger>
           <TabsTrigger value="receber"><ArrowDownCircle className="h-4 w-4 mr-2" />Contas a receber</TabsTrigger>
         </TabsList>
-        <TabsContent value="pagar"><ContasPagar /></TabsContent>
-        <TabsContent value="receber"><ContasReceber /></TabsContent>
+        <TabsContent value="pagar"><ContasPagar focusId={tab === "pagar" ? id : undefined} /></TabsContent>
+        <TabsContent value="receber"><ContasReceber focusId={tab === "receber" ? id : undefined} /></TabsContent>
       </Tabs>
     </div>
   );
+}
+
+function useFocusRow(rows: any[], focusId: string | undefined, open: (row: any) => void) {
+  const handled = useRef<string | null>(null);
+  useEffect(() => {
+    if (!focusId || handled.current === focusId) return;
+    const row = rows.find((r) => r.id === focusId);
+    if (row) { handled.current = focusId; open(row); }
+  }, [focusId, rows, open]);
 }
 
 const STATUS_PAGAR = ["pendente", "pago", "atrasado"];
@@ -57,12 +73,13 @@ function statusInfo(s: string | null) {
 
 /* ============================= PAGAR ============================= */
 
-function ContasPagar() {
+function ContasPagar({ focusId }: { focusId?: string }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("todos");
   const [detalhe, setDetalhe] = useState<any | null>(null);
+
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["contas_pagar_full"],
@@ -120,6 +137,8 @@ function ContasPagar() {
     },
     onSuccess: () => { toast.success("Marcada como paga"); qc.invalidateQueries({ queryKey: ["contas_pagar_full"] }); },
   });
+
+  useFocusRow(rows, focusId, setDetalhe);
 
   const filtered = statusFilter === "todos" ? rows : rows.filter((r) => r.status === statusFilter);
   const totais = useMemo(() => ({
