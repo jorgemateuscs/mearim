@@ -34,6 +34,7 @@ function ConciliacaoPage() {
   const [dataIni, setDataIni] = useState<string>(firstDay.toISOString().slice(0, 10));
   const [dataFim, setDataFim] = useState<string>(today.toISOString().slice(0, 10));
   const [tab, setTab] = useState<string>("historico");
+  const [highlight, setHighlight] = useState<string | null>(null);
 
   const { data: bancos = [] } = useQuery({
     queryKey: ["bancos"],
@@ -85,8 +86,16 @@ function ConciliacaoPage() {
           <TabsTrigger value="transferencias"><ArrowLeftRight className="h-4 w-4 mr-2" />Transferências</TabsTrigger>
           <TabsTrigger value="bancos"><Landmark className="h-4 w-4 mr-2" />Cadastro de bancos</TabsTrigger>
         </TabsList>
-        <TabsContent value="historico"><Historico bancoId={bancoFilter} bancos={bancos} dataIni={dataIni} dataFim={dataFim} /></TabsContent>
-        <TabsContent value="transferencias"><Transferencias bancoId={bancoFilter} bancos={bancos} /></TabsContent>
+        <TabsContent value="historico">
+          <Historico
+            bancoId={bancoFilter}
+            bancos={bancos}
+            dataIni={dataIni}
+            dataFim={dataFim}
+            onFocusTransfer={(id) => { setHighlight(id); setTab("transferencias"); }}
+          />
+        </TabsContent>
+        <TabsContent value="transferencias"><Transferencias bancoId={bancoFilter} bancos={bancos} highlightId={highlight} /></TabsContent>
         <TabsContent value="bancos"><Bancos /></TabsContent>
       </Tabs>
     </div>
@@ -245,15 +254,15 @@ function tipoBadge(tipo: HistItem["tipo"]) {
   return map[tipo];
 }
 
-function Historico({ bancoId, bancos, dataIni, dataFim }: { bancoId: string; bancos: any[]; dataIni: string; dataFim: string }) {
+function Historico({ bancoId, bancos, dataIni, dataFim, onFocusTransfer }: { bancoId: string; bancos: any[]; dataIni: string; dataFim: string; onFocusTransfer: (id: string) => void }) {
   const navigate = useNavigate();
   const { data: movs, isLoading } = useMovimentacoes(dataIni, dataFim);
   const items = useMemo(() => movs ? buildHistorico(bancoId, bancos, movs) : [], [movs, bancoId, bancos]);
 
   const handleClick = (h: HistItem) => {
-    if (h.tipo === "recebimento") navigate({ to: "/financeiro", search: { tab: "receber" } as any });
-    else if (h.tipo === "pagamento") navigate({ to: "/financeiro", search: { tab: "pagar" } as any });
-    else navigate({ to: "/conciliacao", hash: "transferencias" });
+    if (h.tipo === "recebimento") navigate({ to: "/financeiro", search: { tab: "receber", id: h.id } });
+    else if (h.tipo === "pagamento") navigate({ to: "/financeiro", search: { tab: "pagar", id: h.id } });
+    else onFocusTransfer(h.id);
   };
 
   return (
@@ -479,7 +488,7 @@ function BancoForm({ editing, onSubmit, loading }: { editing: any | null; onSubm
 
 /* ============================= TRANSFERÊNCIAS ============================= */
 
-function Transferencias({ bancoId, bancos }: { bancoId: string; bancos: any[] }) {
+function Transferencias({ bancoId, bancos, highlightId }: { bancoId: string; bancos: any[]; highlightId?: string | null }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
@@ -565,7 +574,7 @@ function Transferencias({ bancoId, bancos }: { bancoId: string; bancos: any[] })
             {isLoading && <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Carregando...</TableCell></TableRow>}
             {!isLoading && filtered.length === 0 && <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Nenhuma transferência registrada.</TableCell></TableRow>}
             {filtered.map((r) => (
-              <TableRow key={r.id}>
+              <TableRow key={r.id} className={highlightId === r.id ? "bg-primary/10" : undefined}>
                 <TableCell>{formatDate(r.data_transferencia)}</TableCell>
                 <TableCell>{r.origem?.nome ?? "—"}</TableCell>
                 <TableCell>{r.destino?.nome ?? "—"}</TableCell>
