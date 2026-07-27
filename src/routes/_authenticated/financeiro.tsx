@@ -286,7 +286,7 @@ function PagarForm({ editing, onSubmit, loading }: { editing: any | null; onSubm
 
 /* ============================= RECEBER ============================= */
 
-function ContasReceber() {
+function ContasReceber({ focusId }: { focusId?: string }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
@@ -353,6 +353,8 @@ function ContasReceber() {
     },
     onSuccess: () => { toast.success("Marcada como recebida"); qc.invalidateQueries({ queryKey: ["contas_receber_full"] }); },
   });
+
+  useFocusRow(rows, focusId, setDetalhe);
 
   const filtered = statusFilter === "todos" ? rows : rows.filter((r) => r.status === statusFilter);
   const totais = useMemo(() => ({
