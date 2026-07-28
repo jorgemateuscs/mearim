@@ -1,0 +1,1 @@
+DROP TRIGGER IF EXISTS trg_audit_profiles ON public.profiles;
