@@ -205,6 +205,7 @@ function InventarioPage() {
               <Info label="Status" value={statusInfo(detalhe.status_pagamento).label} />
               <Info label="Descrição" value={detalhe.descricao || "—"} />
               <Info label="Observações" value={detalhe.observacao || "—"} />
+              <AuditInfo row={detalhe} />
               <DialogFooter className="pt-2">
                 <Button variant="outline" onClick={() => setDetalhe(null)}>Fechar</Button>
                 <Button onClick={() => { setEditing(detalhe); setDetalhe(null); setOpen(true); }}>Editar</Button>
