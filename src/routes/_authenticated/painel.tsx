@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -372,25 +372,3 @@ function VencimentosCard({ titulo, tab, itens, valorKey }: { titulo: string; tab
   );
 }
 
-function LegacyChartCard({ title, data, labels, color }: { title: string; data: number[]; labels: string[]; color: string }) {
-  const chartData = data.map((v, i) => ({ mes: labels[i] ?? "", valor: v }));
-  return (
-    <Card className="p-5">
-      <div className="text-sm font-medium text-muted-foreground mb-3">{title}</div>
-      <div className="h-40">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData}>
-            <XAxis dataKey="mes" tick={{ fill: "var(--color-muted-foreground)", fontSize: 10 }} axisLine={false} tickLine={false} />
-            <Tooltip
-              cursor={{ fill: "var(--color-muted)", opacity: 0.3 }}
-              contentStyle={{ background: "var(--color-popover)", border: "1px solid var(--color-border)", borderRadius: 8, fontSize: 12 }}
-              formatter={(v: number) => formatBRL(v)}
-              labelStyle={{ color: "var(--color-muted-foreground)" }}
-            />
-            <Bar dataKey="valor" fill={color} radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-    </Card>
-  );
-}
