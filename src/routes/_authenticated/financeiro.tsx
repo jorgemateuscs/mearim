@@ -455,6 +455,7 @@ function ContasReceber({ focusId }: { focusId?: string }) {
               <Info label="Banco" value={detalhe.bancos?.nome || "—"} />
               <Info label="Status" value={statusInfo(detalhe.status).label} />
               <Info label="Observação" value={detalhe.observacao || "—"} />
+              <AuditInfo row={detalhe} />
               <DialogFooter className="pt-2">
                 <Button variant="outline" onClick={() => setDetalhe(null)}>Fechar</Button>
                 <Button onClick={() => { setEditing(detalhe); setDetalhe(null); setOpen(true); }}>Editar</Button>
