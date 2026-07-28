@@ -16,8 +16,11 @@ import {
   PhoneCall,
   Package,
   AlertCircle,
+  ArrowDownCircle,
+  ArrowUpCircle,
+  CalendarClock,
 } from "lucide-react";
-import { BarChart, Bar, XAxis, ResponsiveContainer, Tooltip } from "recharts";
+import { BarChart, Bar, XAxis, ResponsiveContainer, Tooltip, Legend } from "recharts";
 
 export const Route = createFileRoute("/_authenticated/painel")({
   ssr: false,
@@ -66,8 +69,8 @@ function PainelPage() {
       const [vp, vs, cp, cr, cli, prod] = await Promise.all([
         supabase.from("vendas_produtos").select("data_venda,valor_total,custo_total").gte("data_venda", dataIni).lte("data_venda", dataFim),
         supabase.from("vendas_servicos").select("data_venda,valor_venda,valor_recebido,custo").gte("data_venda", dataIni).lte("data_venda", dataFim),
-        supabase.from("contas_pagar").select("data_vencimento,valor_previsto,valor_pago,status,categoria").gte("data_vencimento", dataIni).lte("data_vencimento", dataFim),
-        supabase.from("contas_receber").select("data_vencimento,valor_parcela,valor_recebido,status").gte("data_vencimento", dataIni).lte("data_vencimento", dataFim),
+        supabase.from("contas_pagar").select("id,descricao,data_vencimento,valor_previsto,valor_pago,status,categoria").gte("data_vencimento", dataIni).lte("data_vencimento", dataFim),
+        supabase.from("contas_receber").select("id,descricao,data_vencimento,valor_parcela,valor_recebido,status,origem_tipo").gte("data_vencimento", dataIni).lte("data_vencimento", dataFim),
         supabase.from("clientes").select("id,data_nascimento,proximo_contato,forma_prospeccao"),
         supabase.from("produtos").select("qtde_adquirida,qtde_vendida,valor_venda,custo_medio"),
       ]);
@@ -84,17 +87,36 @@ function PainelPage() {
 
   const fatProdutos = (data?.vendasProd ?? []).reduce((s, v) => s + Number(v.valor_total ?? 0), 0);
   const fatServicos = (data?.vendasServ ?? []).reduce((s, v) => s + Number(v.valor_recebido ?? 0), 0);
-  const faturamento = fatProdutos + fatServicos;
+  // Recebimentos avulsos (contas a receber que não vieram de uma venda já contabilizada)
+  const fatContas = (data?.contasReceber ?? [])
+    .filter((c: any) => c.origem_tipo !== "venda_produto" && c.origem_tipo !== "venda_servico")
+    .reduce((s, c) => s + Number(c.valor_recebido ?? 0), 0);
+  const faturamento = fatProdutos + fatServicos + fatContas;
   const despesas = (data?.contasPagar ?? []).reduce((s, c) => s + Number(c.valor_pago ?? 0), 0);
   const saldo = faturamento - despesas;
 
+  const cpList = (data?.contasPagar ?? []) as any[];
+  const crList = (data?.contasReceber ?? []) as any[];
+  const pagoPeriodo = despesas;
+  const recebidoPeriodo = crList.reduce((s, c) => s + Number(c.valor_recebido ?? 0), 0);
+  const pagarPend = cpList.filter((c) => c.status !== "pago" && c.status !== "Pago");
+  const receberPend = crList.filter((c) => c.status !== "recebido" && c.status !== "Recebido");
+  const aPagar = pagarPend.reduce((s, c) => s + Number(c.valor_previsto ?? 0), 0);
+  const aReceber = receberPend.reduce((s, c) => s + Number(c.valor_parcela ?? 0), 0);
+  const pagarVencidas = pagarPend.filter((c) => c.data_vencimento < today);
+  const receberVencidas = receberPend.filter((c) => c.data_vencimento < today);
+  const proximasPagar = [...pagarPend].filter((c) => c.data_vencimento >= today).sort((a, b) => a.data_vencimento.localeCompare(b.data_vencimento)).slice(0, 5);
+  const proximasReceber = [...receberPend].filter((c) => c.data_vencimento >= today).sort((a, b) => a.data_vencimento.localeCompare(b.data_vencimento)).slice(0, 5);
+
   const meses = useMemo(() => buildMeses(dataIni, dataFim), [dataIni, dataFim]);
 
-  const { receitasMes, despesasMes, lucroMes } = useMemo(() => {
+  const { receitasMes, despesasMes, lucroMes, receberMes, pagarMes } = useMemo(() => {
     const idx = new Map(meses.map((m, i) => [m.key, i]));
     const receitas = Array(meses.length).fill(0);
     const desp = Array(meses.length).fill(0);
     const lucro = Array(meses.length).fill(0);
+    const receber = Array(meses.length).fill(0);
+    const pagar = Array(meses.length).fill(0);
     const at = (d?: string | null) => (d ? idx.get(d.slice(0, 7)) : undefined);
     (data?.vendasProd ?? []).forEach((v) => {
       const i = at(v.data_venda); if (i === undefined) return;
@@ -109,8 +131,17 @@ function PainelPage() {
     (data?.contasPagar ?? []).forEach((c) => {
       const i = at(c.data_vencimento); if (i === undefined) return;
       desp[i] += Number(c.valor_pago ?? 0);
+      pagar[i] += Number(c.valor_previsto ?? 0);
     });
-    return { receitasMes: receitas, despesasMes: desp, lucroMes: lucro };
+    (data?.contasReceber ?? []).forEach((c: any) => {
+      const i = at(c.data_vencimento); if (i === undefined) return;
+      receber[i] += Number(c.valor_parcela ?? 0);
+      if (c.origem_tipo !== "venda_produto" && c.origem_tipo !== "venda_servico") {
+        receitas[i] += Number(c.valor_recebido ?? 0);
+        lucro[i] += Number(c.valor_recebido ?? 0);
+      }
+    });
+    return { receitasMes: receitas, despesasMes: desp, lucroMes: lucro, receberMes: receber, pagarMes: pagar };
   }, [data, meses]);
 
   const totalClientes = (data?.clientes ?? []).length;
@@ -164,10 +195,27 @@ function PainelPage() {
 
       {/* KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Kpi icon={TrendingUp} label="Faturamento" value={formatBRL(faturamento)} tone="success" sub={`Produtos ${formatBRL(fatProdutos)} · Serviços ${formatBRL(fatServicos)}`} />
+        <Kpi icon={TrendingUp} label="Faturamento" value={formatBRL(faturamento)} tone="success" sub={`Produtos ${formatBRL(fatProdutos)} · Serviços ${formatBRL(fatServicos)} · Recebimentos ${formatBRL(fatContas)}`} />
         <Kpi icon={TrendingDown} label="Despesas" value={formatBRL(despesas)} tone="destructive" />
         <Kpi icon={Wallet} label="Saldo" value={formatBRL(saldo)} tone={saldo >= 0 ? "success" : "destructive"} />
         <Kpi icon={Package} label="Valor em estoque" value={formatBRL(estoqueValor)} tone="primary" />
+      </div>
+
+      {/* KPIs financeiros — contas a pagar / receber */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Kpi icon={ArrowDownCircle} label="A receber" value={formatBRL(aReceber)} tone="primary" sub={`${receberPend.length} conta(s) pendente(s)`} />
+        <Kpi icon={ArrowDownCircle} label="Recebido no período" value={formatBRL(recebidoPeriodo)} tone="success" />
+        <Kpi icon={ArrowUpCircle} label="A pagar" value={formatBRL(aPagar)} tone="destructive" sub={`${pagarPend.length} conta(s) pendente(s)`} />
+        <Kpi
+          icon={CalendarClock}
+          label="Vencidos"
+          value={formatBRL(
+            pagarVencidas.reduce((s, c) => s + Number(c.valor_previsto ?? 0), 0) +
+              receberVencidas.reduce((s, c) => s + Number(c.valor_parcela ?? 0), 0),
+          )}
+          tone="destructive"
+          sub={`${pagarVencidas.length} a pagar · ${receberVencidas.length} a receber`}
+        />
       </div>
 
       {/* Charts */}
@@ -175,6 +223,20 @@ function PainelPage() {
         <ChartCard title="Faturamento mensal" data={receitasMes} labels={meses.map((m) => m.label)} color="var(--color-chart-1)" />
         <ChartCard title="Despesas mensais" data={despesasMes} labels={meses.map((m) => m.label)} color="var(--color-chart-5)" />
         <ChartCard title="Lucro mensal" data={lucroMes} labels={meses.map((m) => m.label)} color="var(--color-chart-2)" />
+      </div>
+
+      {/* Contas a receber x a pagar */}
+      <DualChartCard
+        title="Contas a receber x contas a pagar (por vencimento)"
+        labels={meses.map((m) => m.label)}
+        receber={receberMes}
+        pagar={pagarMes}
+      />
+
+      {/* Próximos vencimentos */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <VencimentosCard titulo="Próximas contas a receber" tab="receber" itens={proximasReceber} valorKey="valor_parcela" />
+        <VencimentosCard titulo="Próximas contas a pagar" tab="pagar" itens={proximasPagar} valorKey="valor_previsto" />
       </div>
 
       {/* Clientes + Contas */}
