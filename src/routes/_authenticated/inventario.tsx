@@ -13,6 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { formatBRL, formatDate } from "@/lib/format";
+import { AuditInfo } from "@/components/audit-info";
 import { Plus, Pencil, Trash2, Boxes } from "lucide-react";
 import { toast } from "sonner";
 
