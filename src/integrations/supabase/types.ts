@@ -17,26 +17,32 @@ export type Database = {
       bancos: {
         Row: {
           created_at: string
+          created_by: string | null
           id: string
           nome: string
           saldo_inicial: number
           updated_at: string
+          updated_by: string | null
           user_id: string
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
           id?: string
           nome: string
           saldo_inicial?: number
           updated_at?: string
+          updated_by?: string | null
           user_id: string
         }
         Update: {
           created_at?: string
+          created_by?: string | null
           id?: string
           nome?: string
           saldo_inicial?: number
           updated_at?: string
+          updated_by?: string | null
           user_id?: string
         }
         Relationships: []
@@ -45,6 +51,7 @@ export type Database = {
         Row: {
           ativo: boolean
           created_at: string
+          created_by: string | null
           descricao: string | null
           id: string
           nome: string
@@ -56,6 +63,7 @@ export type Database = {
         Insert: {
           ativo?: boolean
           created_at?: string
+          created_by?: string | null
           descricao?: string | null
           id?: string
           nome: string
@@ -67,6 +75,7 @@ export type Database = {
         Update: {
           ativo?: boolean
           created_at?: string
+          created_by?: string | null
           descricao?: string | null
           id?: string
           nome?: string
@@ -82,6 +91,7 @@ export type Database = {
           contato: string | null
           cpf_cnpj: string | null
           created_at: string
+          created_by: string | null
           data_nascimento: string | null
           dias_proximo_contato: number | null
           forma_prospeccao: string | null
@@ -93,12 +103,14 @@ export type Database = {
           proximo_contato: string | null
           ultimo_contato: string | null
           updated_at: string
+          updated_by: string | null
           user_id: string
         }
         Insert: {
           contato?: string | null
           cpf_cnpj?: string | null
           created_at?: string
+          created_by?: string | null
           data_nascimento?: string | null
           dias_proximo_contato?: number | null
           forma_prospeccao?: string | null
@@ -110,12 +122,14 @@ export type Database = {
           proximo_contato?: string | null
           ultimo_contato?: string | null
           updated_at?: string
+          updated_by?: string | null
           user_id: string
         }
         Update: {
           contato?: string | null
           cpf_cnpj?: string | null
           created_at?: string
+          created_by?: string | null
           data_nascimento?: string | null
           dias_proximo_contato?: number | null
           forma_prospeccao?: string | null
@@ -127,6 +141,7 @@ export type Database = {
           proximo_contato?: string | null
           ultimo_contato?: string | null
           updated_at?: string
+          updated_by?: string | null
           user_id?: string
         }
         Relationships: []
@@ -137,6 +152,7 @@ export type Database = {
           categoria: string | null
           categoria_id: string | null
           created_at: string
+          created_by: string | null
           data_pagamento: string | null
           data_vencimento: string
           descricao: string
@@ -159,6 +175,7 @@ export type Database = {
           categoria?: string | null
           categoria_id?: string | null
           created_at?: string
+          created_by?: string | null
           data_pagamento?: string | null
           data_vencimento: string
           descricao: string
@@ -183,6 +200,7 @@ export type Database = {
           categoria?: string | null
           categoria_id?: string | null
           created_at?: string
+          created_by?: string | null
           data_pagamento?: string | null
           data_vencimento?: string
           descricao?: string
@@ -234,6 +252,7 @@ export type Database = {
           contato: string | null
           cpf_cnpj: string | null
           created_at: string
+          created_by: string | null
           data_recebimento: string | null
           data_vencimento: string
           data_venda: string | null
@@ -260,6 +279,7 @@ export type Database = {
           contato?: string | null
           cpf_cnpj?: string | null
           created_at?: string
+          created_by?: string | null
           data_recebimento?: string | null
           data_vencimento: string
           data_venda?: string | null
@@ -288,6 +308,7 @@ export type Database = {
           contato?: string | null
           cpf_cnpj?: string | null
           created_at?: string
+          created_by?: string | null
           data_recebimento?: string | null
           data_vencimento?: string
           data_venda?: string | null
@@ -346,6 +367,7 @@ export type Database = {
           banco_id: string | null
           categoria_id: string | null
           created_at: string
+          created_by: string | null
           data_compra: string | null
           fornecedor_id: string | null
           id: string
@@ -367,6 +389,7 @@ export type Database = {
           banco_id?: string | null
           categoria_id?: string | null
           created_at?: string
+          created_by?: string | null
           data_compra?: string | null
           fornecedor_id?: string | null
           id?: string
@@ -388,6 +411,7 @@ export type Database = {
           banco_id?: string | null
           categoria_id?: string | null
           created_at?: string
+          created_by?: string | null
           data_compra?: string | null
           fornecedor_id?: string | null
           id?: string
@@ -433,6 +457,7 @@ export type Database = {
           ativo: boolean
           contato: string | null
           created_at: string
+          created_by: string | null
           documento: string | null
           email: string | null
           endereco: string | null
@@ -447,6 +472,7 @@ export type Database = {
           ativo?: boolean
           contato?: string | null
           created_at?: string
+          created_by?: string | null
           documento?: string | null
           email?: string | null
           endereco?: string | null
@@ -461,6 +487,7 @@ export type Database = {
           ativo?: boolean
           contato?: string | null
           created_at?: string
+          created_by?: string | null
           documento?: string | null
           email?: string | null
           endereco?: string | null
@@ -477,6 +504,7 @@ export type Database = {
         Row: {
           categoria: string
           created_at: string
+          created_by: string | null
           data_aquisicao: string | null
           descricao: string | null
           fornecedor: string | null
@@ -486,6 +514,7 @@ export type Database = {
           quantidade: number
           status_pagamento: string
           updated_at: string
+          updated_by: string | null
           user_id: string
           valor_pago: number
           valor_total: number
@@ -493,6 +522,7 @@ export type Database = {
         Insert: {
           categoria?: string
           created_at?: string
+          created_by?: string | null
           data_aquisicao?: string | null
           descricao?: string | null
           fornecedor?: string | null
@@ -502,6 +532,7 @@ export type Database = {
           quantidade?: number
           status_pagamento?: string
           updated_at?: string
+          updated_by?: string | null
           user_id: string
           valor_pago?: number
           valor_total?: number
@@ -509,6 +540,7 @@ export type Database = {
         Update: {
           categoria?: string
           created_at?: string
+          created_by?: string | null
           data_aquisicao?: string | null
           descricao?: string | null
           fornecedor?: string | null
@@ -518,6 +550,7 @@ export type Database = {
           quantidade?: number
           status_pagamento?: string
           updated_at?: string
+          updated_by?: string | null
           user_id?: string
           valor_pago?: number
           valor_total?: number
@@ -528,6 +561,7 @@ export type Database = {
         Row: {
           ativo: boolean
           created_at: string
+          created_by: string | null
           id: string
           nome: string
           updated_at: string
@@ -537,6 +571,7 @@ export type Database = {
         Insert: {
           ativo?: boolean
           created_at?: string
+          created_by?: string | null
           id?: string
           nome: string
           updated_at?: string
@@ -546,6 +581,7 @@ export type Database = {
         Update: {
           ativo?: boolean
           created_at?: string
+          created_by?: string | null
           id?: string
           nome?: string
           updated_at?: string
@@ -560,6 +596,7 @@ export type Database = {
           banco_id: string | null
           categoria_id: string | null
           created_at: string
+          created_by: string | null
           data_compra: string | null
           fornecedor_id: string | null
           id: string
@@ -579,6 +616,7 @@ export type Database = {
           banco_id?: string | null
           categoria_id?: string | null
           created_at?: string
+          created_by?: string | null
           data_compra?: string | null
           fornecedor_id?: string | null
           id?: string
@@ -598,6 +636,7 @@ export type Database = {
           banco_id?: string | null
           categoria_id?: string | null
           created_at?: string
+          created_by?: string | null
           data_compra?: string | null
           fornecedor_id?: string | null
           id?: string
@@ -640,6 +679,7 @@ export type Database = {
         Row: {
           codigo: string | null
           created_at: string
+          created_by: string | null
           custo_medio: number | null
           descricao: string | null
           fornecedor: string | null
@@ -648,12 +688,14 @@ export type Database = {
           qtde_adquirida: number | null
           qtde_vendida: number | null
           updated_at: string
+          updated_by: string | null
           user_id: string
           valor_venda: number | null
         }
         Insert: {
           codigo?: string | null
           created_at?: string
+          created_by?: string | null
           custo_medio?: number | null
           descricao?: string | null
           fornecedor?: string | null
@@ -662,12 +704,14 @@ export type Database = {
           qtde_adquirida?: number | null
           qtde_vendida?: number | null
           updated_at?: string
+          updated_by?: string | null
           user_id: string
           valor_venda?: number | null
         }
         Update: {
           codigo?: string | null
           created_at?: string
+          created_by?: string | null
           custo_medio?: number | null
           descricao?: string | null
           fornecedor?: string | null
@@ -676,6 +720,7 @@ export type Database = {
           qtde_adquirida?: number | null
           qtde_vendida?: number | null
           updated_at?: string
+          updated_by?: string | null
           user_id?: string
           valor_venda?: number | null
         }
@@ -711,6 +756,7 @@ export type Database = {
           comissao_percentual: number | null
           contato: string | null
           created_at: string
+          created_by: string | null
           dias_trabalho: string | null
           funcao: string | null
           id: string
@@ -718,6 +764,7 @@ export type Database = {
           observacao: string | null
           salario_fixo: number | null
           updated_at: string
+          updated_by: string | null
           user_id: string
         }
         Insert: {
@@ -725,6 +772,7 @@ export type Database = {
           comissao_percentual?: number | null
           contato?: string | null
           created_at?: string
+          created_by?: string | null
           dias_trabalho?: string | null
           funcao?: string | null
           id?: string
@@ -732,6 +780,7 @@ export type Database = {
           observacao?: string | null
           salario_fixo?: number | null
           updated_at?: string
+          updated_by?: string | null
           user_id: string
         }
         Update: {
@@ -739,6 +788,7 @@ export type Database = {
           comissao_percentual?: number | null
           contato?: string | null
           created_at?: string
+          created_by?: string | null
           dias_trabalho?: string | null
           funcao?: string | null
           id?: string
@@ -746,6 +796,7 @@ export type Database = {
           observacao?: string | null
           salario_fixo?: number | null
           updated_at?: string
+          updated_by?: string | null
           user_id?: string
         }
         Relationships: []
@@ -754,36 +805,42 @@ export type Database = {
         Row: {
           comissao_percentual: number | null
           created_at: string
+          created_by: string | null
           custo_medio: number | null
           descricao: string | null
           id: string
           nome: string
           observacao: string | null
           updated_at: string
+          updated_by: string | null
           user_id: string
           valor_venda: number | null
         }
         Insert: {
           comissao_percentual?: number | null
           created_at?: string
+          created_by?: string | null
           custo_medio?: number | null
           descricao?: string | null
           id?: string
           nome: string
           observacao?: string | null
           updated_at?: string
+          updated_by?: string | null
           user_id: string
           valor_venda?: number | null
         }
         Update: {
           comissao_percentual?: number | null
           created_at?: string
+          created_by?: string | null
           custo_medio?: number | null
           descricao?: string | null
           id?: string
           nome?: string
           observacao?: string | null
           updated_at?: string
+          updated_by?: string | null
           user_id?: string
           valor_venda?: number | null
         }
@@ -794,9 +851,12 @@ export type Database = {
           banco_destino_id: string | null
           banco_origem_id: string | null
           created_at: string
+          created_by: string | null
           data_transferencia: string
           id: string
           observacao: string | null
+          updated_at: string
+          updated_by: string | null
           user_id: string
           valor: number
         }
@@ -804,9 +864,12 @@ export type Database = {
           banco_destino_id?: string | null
           banco_origem_id?: string | null
           created_at?: string
+          created_by?: string | null
           data_transferencia?: string
           id?: string
           observacao?: string | null
+          updated_at?: string
+          updated_by?: string | null
           user_id: string
           valor?: number
         }
@@ -814,9 +877,12 @@ export type Database = {
           banco_destino_id?: string | null
           banco_origem_id?: string | null
           created_at?: string
+          created_by?: string | null
           data_transferencia?: string
           id?: string
           observacao?: string | null
+          updated_at?: string
+          updated_by?: string | null
           user_id?: string
           valor?: number
         }
@@ -862,6 +928,7 @@ export type Database = {
         Row: {
           cliente_id: string | null
           created_at: string
+          created_by: string | null
           custo_total: number | null
           data_venda: string
           descricao: string | null
@@ -872,6 +939,7 @@ export type Database = {
           produto_id: string | null
           quantidade: number
           updated_at: string
+          updated_by: string | null
           user_id: string
           valor_total: number
           valor_unitario: number
@@ -879,6 +947,7 @@ export type Database = {
         Insert: {
           cliente_id?: string | null
           created_at?: string
+          created_by?: string | null
           custo_total?: number | null
           data_venda?: string
           descricao?: string | null
@@ -889,6 +958,7 @@ export type Database = {
           produto_id?: string | null
           quantidade?: number
           updated_at?: string
+          updated_by?: string | null
           user_id: string
           valor_total?: number
           valor_unitario?: number
@@ -896,6 +966,7 @@ export type Database = {
         Update: {
           cliente_id?: string | null
           created_at?: string
+          created_by?: string | null
           custo_total?: number | null
           data_venda?: string
           descricao?: string | null
@@ -906,6 +977,7 @@ export type Database = {
           produto_id?: string | null
           quantidade?: number
           updated_at?: string
+          updated_by?: string | null
           user_id?: string
           valor_total?: number
           valor_unitario?: number
@@ -931,6 +1003,7 @@ export type Database = {
         Row: {
           cliente_id: string | null
           created_at: string
+          created_by: string | null
           custo: number | null
           data_prevista_fim: string | null
           data_venda: string
@@ -941,6 +1014,7 @@ export type Database = {
           servico_id: string | null
           status: string | null
           updated_at: string
+          updated_by: string | null
           user_id: string
           valor_recebido: number | null
           valor_venda: number
@@ -948,6 +1022,7 @@ export type Database = {
         Insert: {
           cliente_id?: string | null
           created_at?: string
+          created_by?: string | null
           custo?: number | null
           data_prevista_fim?: string | null
           data_venda?: string
@@ -958,6 +1033,7 @@ export type Database = {
           servico_id?: string | null
           status?: string | null
           updated_at?: string
+          updated_by?: string | null
           user_id: string
           valor_recebido?: number | null
           valor_venda?: number
@@ -965,6 +1041,7 @@ export type Database = {
         Update: {
           cliente_id?: string | null
           created_at?: string
+          created_by?: string | null
           custo?: number | null
           data_prevista_fim?: string | null
           data_venda?: string
@@ -975,6 +1052,7 @@ export type Database = {
           servico_id?: string | null
           status?: string | null
           updated_at?: string
+          updated_by?: string | null
           user_id?: string
           valor_recebido?: number | null
           valor_venda?: number
