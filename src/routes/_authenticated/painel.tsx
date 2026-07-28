@@ -320,3 +320,77 @@ function ChartCard({ title, data, labels, color }: { title: string; data: number
     </Card>
   );
 }
+
+function DualChartCard({ title, labels, receber, pagar }: { title: string; labels: string[]; receber: number[]; pagar: number[] }) {
+  const chartData = labels.map((l, i) => ({ mes: l, Receber: receber[i] ?? 0, Pagar: pagar[i] ?? 0 }));
+  return (
+    <Card className="p-5">
+      <div className="text-sm font-medium text-muted-foreground mb-3">{title}</div>
+      <div className="h-56">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={chartData}>
+            <XAxis dataKey="mes" tick={{ fill: "var(--color-muted-foreground)", fontSize: 10 }} axisLine={false} tickLine={false} />
+            <Tooltip
+              cursor={{ fill: "var(--color-muted)", opacity: 0.3 }}
+              contentStyle={{ background: "var(--color-popover)", border: "1px solid var(--color-border)", borderRadius: 8, fontSize: 12 }}
+              formatter={(v: number) => formatBRL(v)}
+              labelStyle={{ color: "var(--color-muted-foreground)" }}
+            />
+            <Legend wrapperStyle={{ fontSize: 11 }} />
+            <Bar dataKey="Receber" fill="var(--color-chart-2)" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="Pagar" fill="var(--color-chart-5)" radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </Card>
+  );
+}
+
+function VencimentosCard({ titulo, tab, itens, valorKey }: { titulo: string; tab: "pagar" | "receber"; itens: any[]; valorKey: string }) {
+  const navigate = useNavigate();
+  return (
+    <Card className="p-6">
+      <h2 className="font-semibold mb-4 flex items-center gap-2"><CalendarClock className="h-4 w-4 text-primary" /> {titulo}</h2>
+      {itens.length === 0 && <p className="text-sm text-muted-foreground">Nenhum vencimento no período.</p>}
+      <div className="space-y-1">
+        {itens.map((c) => (
+          <button
+            key={c.id}
+            type="button"
+            onClick={() => navigate({ to: "/financeiro", search: { tab, id: c.id } })}
+            className="w-full flex items-center justify-between gap-3 py-2 px-2 rounded-md hover:bg-muted/40 text-left border-b border-border/40 last:border-0"
+          >
+            <span className="text-sm truncate">{c.descricao || "—"}</span>
+            <span className="flex items-center gap-3 shrink-0">
+              <span className="text-[11px] text-muted-foreground">{formatDate(c.data_vencimento)}</span>
+              <span className="text-sm font-semibold">{formatBRL(Number(c[valorKey] ?? 0))}</span>
+            </span>
+          </button>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+function LegacyChartCard({ title, data, labels, color }: { title: string; data: number[]; labels: string[]; color: string }) {
+  const chartData = data.map((v, i) => ({ mes: labels[i] ?? "", valor: v }));
+  return (
+    <Card className="p-5">
+      <div className="text-sm font-medium text-muted-foreground mb-3">{title}</div>
+      <div className="h-40">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={chartData}>
+            <XAxis dataKey="mes" tick={{ fill: "var(--color-muted-foreground)", fontSize: 10 }} axisLine={false} tickLine={false} />
+            <Tooltip
+              cursor={{ fill: "var(--color-muted)", opacity: 0.3 }}
+              contentStyle={{ background: "var(--color-popover)", border: "1px solid var(--color-border)", borderRadius: 8, fontSize: 12 }}
+              formatter={(v: number) => formatBRL(v)}
+              labelStyle={{ color: "var(--color-muted-foreground)" }}
+            />
+            <Bar dataKey="valor" fill={color} radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </Card>
+  );
+}
