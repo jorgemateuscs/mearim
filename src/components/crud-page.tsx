@@ -11,6 +11,8 @@ import { Plus, Pencil, Trash2, Search } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { AuditInfo } from "@/components/audit-info";
+import { formatDateTime } from "@/lib/format";
 
 export type Field = {
   key: string;
@@ -122,15 +124,16 @@ export function CrudPage({ title, description, table, fields, searchKey }: Props
                 {tableFields.map((f) => (
                   <TableHead key={f.key} className="whitespace-nowrap">{f.label}</TableHead>
                 ))}
+                <TableHead className="whitespace-nowrap">Última alteração</TableHead>
                 <TableHead className="w-24 text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading && (
-                <TableRow><TableCell colSpan={tableFields.length + 1} className="text-center text-muted-foreground py-8">Carregando...</TableCell></TableRow>
+                <TableRow><TableCell colSpan={tableFields.length + 2} className="text-center text-muted-foreground py-8">Carregando...</TableCell></TableRow>
               )}
               {!isLoading && filtered.length === 0 && (
-                <TableRow><TableCell colSpan={tableFields.length + 1} className="text-center text-muted-foreground py-8">Nenhum registro. Clique em "Novo" para começar.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={tableFields.length + 2} className="text-center text-muted-foreground py-8">Nenhum registro. Clique em "Novo" para começar.</TableCell></TableRow>
               )}
               {filtered.map((row) => (
                 <TableRow key={row.id}>
@@ -139,6 +142,9 @@ export function CrudPage({ title, description, table, fields, searchKey }: Props
                       {f.render ? f.render(row[f.key], row) : (row[f.key] ?? "—")}
                     </TableCell>
                   ))}
+                  <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
+                    {formatDateTime(row.updated_at ?? row.created_at)}
+                  </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
                       <Button size="icon" variant="ghost" onClick={() => { setEditing(row); setOpen(true); }}>
@@ -203,6 +209,7 @@ function FormDialog({ fields, editing, onSubmit, loading }: { fields: Field[]; e
           <Button type="submit" disabled={loading}>{loading ? "Salvando..." : "Salvar"}</Button>
         </DialogFooter>
       </form>
+      {editing && <AuditInfo row={editing} />}
     </DialogContent>
   );
 }
