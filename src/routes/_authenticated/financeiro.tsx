@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { EntitySelect } from "@/components/entity-select";
 import { formatBRL, formatDate } from "@/lib/format";
+import { AuditInfo } from "@/components/audit-info";
 import { Plus, Pencil, Trash2, CheckCircle2, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
 import { toast } from "sonner";
 
@@ -232,6 +233,7 @@ function ContasPagar({ focusId }: { focusId?: string }) {
               <Info label="Banco" value={detalhe.bancos?.nome || "—"} />
               <Info label="Status" value={statusInfo(detalhe.status).label} />
               <Info label="Observação" value={detalhe.observacao || "—"} />
+              <AuditInfo row={detalhe} />
               <DialogFooter className="pt-2">
                 <Button variant="outline" onClick={() => setDetalhe(null)}>Fechar</Button>
                 <Button onClick={() => { setEditing(detalhe); setDetalhe(null); setOpen(true); }}>Editar</Button>
