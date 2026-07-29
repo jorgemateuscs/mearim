@@ -1,37 +1,45 @@
-## 1. Painel — incluir Contas a Pagar e Contas a Receber
+## 1. "Registro" com o e-mail de quem fez a alteração
 
-Hoje o painel mostra faturamento (vendas de produtos + serviços) e despesas pagas. Vou ampliar para trazer o financeiro completo dentro do período selecionado:
+Hoje o bloco Registro mostra só data/hora. Os campos `created_by`/`updated_by` já são gravados por gatilho em todas as tabelas, mas guardam o UUID do usuário — e a tabela `profiles` está vazia (o gatilho de criação de perfil nunca foi ligado), então não há de onde tirar o nome.
 
-- **Novos cartões (KPIs)**, todos respeitando o período:
-  - A receber (pendente) — total e quantidade
-  - Recebido no período
-  - A pagar (pendente) — total e quantidade
-  - Pago no período
-  - Vencidos (a pagar e a receber), destacados
-- **Faturamento ampliado**: o cartão de Faturamento passa a somar vendas de produtos, vendas de serviços e recebimentos de contas a receber, com o detalhamento das três origens embaixo (evitando dupla contagem quando a conta a receber tem origem numa venda).
-- **Novo gráfico "Contas a receber x Contas a pagar por mês"** (previsto vs realizado).
-- **Listas rápidas**: próximas contas a pagar e a receber a vencer, clicáveis, abrindo o registro exato em Financeiro (mesmo deep link já usado na Conciliação).
+O que farei:
 
-## 2. Bloqueio de tela por inatividade (PIN)
+- Criar uma server function autenticada que recebe uma lista de IDs de usuário e devolve o e-mail correspondente (consulta feita no servidor, com privilégio administrativo; nada de dados sensíveis vai para o navegador além do e-mail).
+- Criar um hook `useUserLabels` com cache (React Query) para resolver esses e-mails uma única vez por sessão.
+- Atualizar `AuditInfo` para exibir:
+  - `Criado em 29/07/2026 15:46 por jorgemateus73@gmail.com`
+  - `Última alteração 29/07/2026 16:10 por jorgemateus73@gmail.com`
+  - Quando não houver usuário registrado (lançamentos antigos), mostrar "—".
+- Como o `AuditInfo` já é usado no CRUD genérico, Financeiro, Inventário e demais modais de detalhe, a mudança vale para o sistema inteiro automaticamente.
 
-- Após 2 minutos sem mouse, teclado, toque ou scroll, a aplicação exibe uma tela de bloqueio em tela cheia (blur sobre o conteúdo, relógio, nome/e-mail do usuário, campo de PIN e botão "Sair").
-- O PIN também é exigido **logo após o login**, inclusive no login com Google, antes de liberar qualquer tela protegida.
-- O desbloqueio é validado no servidor: o PIN (01235) fica guardado como segredo do backend, nunca no código do navegador. A comparação é feita de forma segura e o estado "desbloqueado" fica numa sessão assinada, com limite de tentativas para evitar força bruta.
-- O bloqueio cobre todas as telas internas (fica no layout autenticado), portanto vale para todos os menus automaticamente.
+## 2. Login com outro e-mail volta para a tela do Google
 
-Observação: como é um PIN único do sistema (não por usuário), ele funciona como trava de estação de trabalho, não como autenticação individual — o login continua sendo o Google/e-mail.
+Diagnóstico do que já verifiquei:
 
-## 3. Auditoria de data e hora em todo o sistema
+- O site publicado está com visibilidade **pública** (não é bloqueio do Lovable).
+- Existem apenas 2 usuários no banco e, nos últimos 7 dias, **nenhuma tentativa de novo login chegou ao servidor de autenticação** — ou seja, o fluxo falha antes de voltar para o app, o que é típico de configuração do cliente OAuth próprio do Google.
 
-O banco já grava `created_at` e `updated_at` automaticamente em todas as tabelas (gatilhos verificados). O que falta é registrar **quem** fez e **mostrar** isso nas telas:
+Como você usa **credenciais próprias do Google (Google Cloud)**, as causas mais prováveis, em ordem:
 
-- Migração: adicionar `created_by` e `updated_by` onde ainda não existem (clientes, bancos, produtos, servicos, profissionais, vendas_produtos, vendas_servicos, transferencias, inventario, contas_pagar/receber já têm `updated_by`), preenchendo automaticamente com o usuário logado via gatilho.
-- Padronizar todos os formulários (CRUD genérico, Financeiro, Vendas, Inventário, Patrimônio, Configurações) para gravar esses campos.
-- Exibir em todos os modais de detalhe um bloco **"Registro"**: Criado em dd/mm/aaaa hh:mm por Fulano · Última alteração dd/mm/aaaa hh:mm por Fulano.
-- Adicionar coluna opcional "Última alteração" nas tabelas de listagem, e formatador de data+hora compartilhado em `src/lib/format.ts`.
+1. **Tela de consentimento em modo "Testing"** — nesse modo só os e-mails cadastrados como "Test users" conseguem entrar; qualquer outro é devolvido para a tela de login. Solução: publicar a tela de consentimento ("Publish app") no Google Cloud, ou adicionar o e-mail como test user.
+2. **Domínio/URI de redirecionamento** — o `mearim.lovable.app` (e o domínio de preview) precisam estar em "Authorized domains" e a URL de callback exata precisa estar em "Authorized redirect URIs".
+3. **Cadastro de novos usuários desabilitado** no backend — se estiver, o login externo é recusado.
+
+O que farei nesta etapa:
+
+- Conferir a configuração de autenticação do projeto (provedor Google ativo, credenciais em uso, cadastro de novos usuários habilitado) e corrigir o que estiver do meu lado.
+- Fazer o `/auth` mostrar a mensagem de erro real que voltar do Google/backend (hoje o erro pode ser engolido e o usuário só volta para a tela de login), com log no console para diagnóstico.
+- Te entregar a lista exata do que precisa ser ajustado no Google Cloud (o que só você consegue alterar), com os valores prontos para copiar.
+
+## 3. Aviso importante sobre múltiplos usuários
+
+Todas as tabelas do sistema são isoladas por usuário (`user_id = usuário logado`). Isso significa que, mesmo depois de resolver o login, **um novo e-mail vai entrar em um sistema vazio** — não verá bancos, contas, clientes nem vendas já cadastrados.
+
+Se a intenção é que várias pessoas trabalhem sobre os mesmos dados, isso exige uma mudança de modelo (empresa/equipe compartilhada com permissões por papel). Posso planejar isso em seguida — não está incluído nesta entrega.
 
 ## Detalhes técnicos
 
-- Painel: uma única query agregada por período, reaproveitando as mesmas consultas usadas em Financeiro para não divergir números.
-- Bloqueio: `SITE_PIN` + `SESSION_SECRET` como segredos do backend; server function `unlockScreen`/`lockScreen` com comparação em tempo constante e sessão criptografada; componente `ScreenLockProvider` montado em `src/routes/_authenticated/route.tsx` com listeners de atividade e `visibilitychange`.
-- Auditoria: gatilho `set_audit_fields()` usando `auth.uid()` para `created_by`/`updated_by`, mais join leve em `profiles` para exibir o nome.
+- `src/lib/user-labels.functions.ts`: server fn com `requireSupabaseAuth`, carregando o cliente administrativo dentro do handler para buscar os e-mails por ID.
+- `src/hooks/use-user-labels.ts`: React Query com `staleTime` alto, chave por conjunto de IDs.
+- `src/components/audit-info.tsx`: passa a receber os rótulos e renderizar "por <e-mail>".
+- `src/routes/auth.tsx`: exibição do erro real (toast + mensagem inline) nos fluxos de e-mail/senha e Google.
