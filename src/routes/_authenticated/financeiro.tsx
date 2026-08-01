@@ -117,13 +117,13 @@ function ContasPagar({ focusId }: { focusId?: string }) {
         if (error) throw error;
       }
     },
-    onSuccess: () => { toast.success(editing ? "Atualizado" : "Cadastrado"); qc.invalidateQueries({ queryKey: ["contas_pagar_full"] }); setOpen(false); setEditing(null); },
+    onSuccess: () => { toast.success(editing ? "Atualizado" : "Cadastrado"); qc.invalidateQueries(); setOpen(false); setEditing(null); },
     onError: (e: any) => toast.error(e.message ?? "Erro"),
   });
 
   const del = useMutation({
     mutationFn: async (id: string) => { const { error } = await supabase.from("contas_pagar").delete().eq("id", id); if (error) throw error; },
-    onSuccess: () => { toast.success("Removido"); qc.invalidateQueries({ queryKey: ["contas_pagar_full"] }); },
+    onSuccess: () => { toast.success("Removido"); qc.invalidateQueries(); },
   });
 
   const quitar = useMutation({
@@ -136,7 +136,7 @@ function ContasPagar({ focusId }: { focusId?: string }) {
       }).eq("id", row.id);
       if (error) throw error;
     },
-    onSuccess: () => { toast.success("Marcada como paga"); qc.invalidateQueries({ queryKey: ["contas_pagar_full"] }); },
+    onSuccess: () => { toast.success("Marcada como paga"); qc.invalidateQueries(); },
   });
 
   useFocusRow(rows, focusId, setDetalhe);
@@ -334,13 +334,13 @@ function ContasReceber({ focusId }: { focusId?: string }) {
         if (error) throw error;
       }
     },
-    onSuccess: () => { toast.success(editing ? "Atualizado" : "Cadastrado"); qc.invalidateQueries({ queryKey: ["contas_receber_full"] }); setOpen(false); setEditing(null); },
+    onSuccess: () => { toast.success(editing ? "Atualizado" : "Cadastrado"); qc.invalidateQueries(); setOpen(false); setEditing(null); },
     onError: (e: any) => toast.error(e.message ?? "Erro"),
   });
 
   const del = useMutation({
     mutationFn: async (id: string) => { const { error } = await supabase.from("contas_receber").delete().eq("id", id); if (error) throw error; },
-    onSuccess: () => { toast.success("Removido"); qc.invalidateQueries({ queryKey: ["contas_receber_full"] }); },
+    onSuccess: () => { toast.success("Removido"); qc.invalidateQueries(); },
   });
 
   const receber = useMutation({
@@ -353,7 +353,7 @@ function ContasReceber({ focusId }: { focusId?: string }) {
       }).eq("id", row.id);
       if (error) throw error;
     },
-    onSuccess: () => { toast.success("Marcada como recebida"); qc.invalidateQueries({ queryKey: ["contas_receber_full"] }); },
+    onSuccess: () => { toast.success("Marcada como recebida"); qc.invalidateQueries(); },
   });
 
   useFocusRow(rows, focusId, setDetalhe);

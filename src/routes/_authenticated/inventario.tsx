@@ -80,13 +80,13 @@ function InventarioPage() {
         if (error) throw error;
       }
     },
-    onSuccess: () => { toast.success(editing ? "Atualizado" : "Cadastrado"); qc.invalidateQueries({ queryKey: ["inventario"] }); setOpen(false); setEditing(null); },
+    onSuccess: () => { toast.success(editing ? "Atualizado" : "Cadastrado"); qc.invalidateQueries(); setOpen(false); setEditing(null); },
     onError: (e: any) => toast.error(e.message ?? "Erro"),
   });
 
   const del = useMutation({
     mutationFn: async (id: string) => { const { error } = await supabase.from("inventario").delete().eq("id", id); if (error) throw error; },
-    onSuccess: () => { toast.success("Removido"); qc.invalidateQueries({ queryKey: ["inventario"] }); },
+    onSuccess: () => { toast.success("Removido"); qc.invalidateQueries(); },
   });
 
   const filtered = useMemo(() => rows.filter((r) => (filtroCat === "todas" || r.categoria === filtroCat) && (filtroStatus === "todos" || r.status_pagamento === filtroStatus)), [rows, filtroCat, filtroStatus]);
