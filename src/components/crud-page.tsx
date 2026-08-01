@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { AuditInfo } from "@/components/audit-info";
 import { formatDateTime } from "@/lib/format";
+import { useUserEmails, userLabel } from "@/hooks/use-user-emails";
 
 export type Field = {
   key: string;
@@ -34,6 +35,7 @@ type Props = {
 
 export function CrudPage({ title, description, table, fields, searchKey }: Props) {
   const qc = useQueryClient();
+  const emails = useUserEmails();
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
@@ -143,7 +145,8 @@ export function CrudPage({ title, description, table, fields, searchKey }: Props
                     </TableCell>
                   ))}
                   <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
-                    {formatDateTime(row.updated_at ?? row.created_at)}
+                    <div>{formatDateTime(row.updated_at ?? row.created_at)}</div>
+                    <div className="text-[10px]">{userLabel(emails, row.updated_by ?? row.created_by)}</div>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
