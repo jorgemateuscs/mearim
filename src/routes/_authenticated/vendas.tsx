@@ -112,8 +112,6 @@ function VendasProdutos() {
     onSuccess: () => {
       toast.success(editing ? "Atualizado" : "Venda registrada");
       qc.invalidateQueries();
-      qc.invalidateQueries();
-      qc.invalidateQueries();
       setOpen(false); setEditing(null);
     },
     onError: (e: any) => toast.error(e.message ?? "Erro"),
@@ -301,7 +299,6 @@ function VendasServicos() {
     },
     onSuccess: () => {
       toast.success(editing ? "Atualizado" : "Venda registrada");
-      qc.invalidateQueries();
       qc.invalidateQueries();
       setOpen(false); setEditing(null);
     },
