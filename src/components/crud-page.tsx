@@ -70,7 +70,7 @@ export function CrudPage({ title, description, table, fields, searchKey }: Props
     },
     onSuccess: () => {
       toast.success(editing ? "Atualizado" : "Cadastrado");
-      qc.invalidateQueries({ queryKey: [table] });
+      qc.invalidateQueries();
       setOpen(false);
       setEditing(null);
     },
@@ -84,7 +84,7 @@ export function CrudPage({ title, description, table, fields, searchKey }: Props
     },
     onSuccess: () => {
       toast.success("Removido");
-      qc.invalidateQueries({ queryKey: [table] });
+      qc.invalidateQueries();
     },
     onError: (e: any) => toast.error(e.message ?? "Erro ao excluir"),
   });

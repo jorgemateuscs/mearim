@@ -111,9 +111,9 @@ function VendasProdutos() {
     },
     onSuccess: () => {
       toast.success(editing ? "Atualizado" : "Venda registrada");
-      qc.invalidateQueries({ queryKey: ["vendas_produtos_full"] });
-      qc.invalidateQueries({ queryKey: ["produtos"] });
-      qc.invalidateQueries({ queryKey: ["contas_receber_full"] });
+      qc.invalidateQueries();
+      qc.invalidateQueries();
+      qc.invalidateQueries();
       setOpen(false); setEditing(null);
     },
     onError: (e: any) => toast.error(e.message ?? "Erro"),
@@ -124,7 +124,7 @@ function VendasProdutos() {
       const { error } = await supabase.from("vendas_produtos").delete().eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => { toast.success("Removido"); qc.invalidateQueries({ queryKey: ["vendas_produtos_full"] }); },
+    onSuccess: () => { toast.success("Removido"); qc.invalidateQueries(); },
   });
 
   const total = rows.reduce((s, r) => s + Number(r.valor_total ?? 0), 0);
@@ -301,8 +301,8 @@ function VendasServicos() {
     },
     onSuccess: () => {
       toast.success(editing ? "Atualizado" : "Venda registrada");
-      qc.invalidateQueries({ queryKey: ["vendas_servicos_full"] });
-      qc.invalidateQueries({ queryKey: ["contas_receber_full"] });
+      qc.invalidateQueries();
+      qc.invalidateQueries();
       setOpen(false); setEditing(null);
     },
     onError: (e: any) => toast.error(e.message ?? "Erro"),
@@ -313,7 +313,7 @@ function VendasServicos() {
       const { error } = await supabase.from("vendas_servicos").delete().eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => { toast.success("Removido"); qc.invalidateQueries({ queryKey: ["vendas_servicos_full"] }); },
+    onSuccess: () => { toast.success("Removido"); qc.invalidateQueries(); },
   });
 
   const total = rows.reduce((s, r) => s + Number(r.valor_venda ?? 0), 0);

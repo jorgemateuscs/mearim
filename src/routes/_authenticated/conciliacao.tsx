@@ -411,9 +411,9 @@ function Bancos() {
     },
     onSuccess: () => {
       toast.success(editing ? "Atualizado" : "Cadastrado");
-      qc.invalidateQueries({ queryKey: ["bancos"] });
-      qc.invalidateQueries({ queryKey: ["conciliacao-movs"] });
-      qc.invalidateQueries({ queryKey: ["select-bancos"] });
+      qc.invalidateQueries();
+      qc.invalidateQueries();
+      qc.invalidateQueries();
       setOpen(false); setEditing(null);
     },
     onError: (e: any) => toast.error(e.message ?? "Erro"),
@@ -421,7 +421,7 @@ function Bancos() {
 
   const del = useMutation({
     mutationFn: async (id: string) => { const { error } = await supabase.from("bancos").delete().eq("id", id); if (error) throw error; },
-    onSuccess: () => { toast.success("Removido"); qc.invalidateQueries({ queryKey: ["bancos"] }); qc.invalidateQueries({ queryKey: ["conciliacao-movs"] }); },
+    onSuccess: () => { toast.success("Removido"); qc.invalidateQueries(); qc.invalidateQueries(); },
   });
 
   return (
@@ -527,13 +527,13 @@ function Transferencias({ bancoId, bancos, highlightId }: { bancoId: string; ban
         if (error) throw error;
       }
     },
-    onSuccess: () => { toast.success(editing ? "Atualizado" : "Registrada"); qc.invalidateQueries({ queryKey: ["transferencias"] }); qc.invalidateQueries({ queryKey: ["conciliacao-movs"] }); setOpen(false); setEditing(null); },
+    onSuccess: () => { toast.success(editing ? "Atualizado" : "Registrada"); qc.invalidateQueries(); qc.invalidateQueries(); setOpen(false); setEditing(null); },
     onError: (e: any) => toast.error(e.message ?? "Erro"),
   });
 
   const del = useMutation({
     mutationFn: async (id: string) => { const { error } = await supabase.from("transferencias").delete().eq("id", id); if (error) throw error; },
-    onSuccess: () => { toast.success("Removida"); qc.invalidateQueries({ queryKey: ["transferencias"] }); qc.invalidateQueries({ queryKey: ["conciliacao-movs"] }); },
+    onSuccess: () => { toast.success("Removida"); qc.invalidateQueries(); qc.invalidateQueries(); },
   });
 
   const total = useMemo(() => filtered.reduce((s, r) => s + Number(r.valor ?? 0), 0), [filtered]);
