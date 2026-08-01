@@ -1,37 +1,32 @@
-## 1. Painel — incluir Contas a Pagar e Contas a Receber
+# Sistema compartilhado, tempo real e e-mail na auditoria
 
-Hoje o painel mostra faturamento (vendas de produtos + serviços) e despesas pagas. Vou ampliar para trazer o financeiro completo dentro do período selecionado:
+## 1. Uma única base de dados para todos
 
-- **Novos cartões (KPIs)**, todos respeitando o período:
-  - A receber (pendente) — total e quantidade
-  - Recebido no período
-  - A pagar (pendente) — total e quantidade
-  - Pago no período
-  - Vencidos (a pagar e a receber), destacados
-- **Faturamento ampliado**: o cartão de Faturamento passa a somar vendas de produtos, vendas de serviços e recebimentos de contas a receber, com o detalhamento das três origens embaixo (evitando dupla contagem quando a conta a receber tem origem numa venda).
-- **Novo gráfico "Contas a receber x Contas a pagar por mês"** (previsto vs realizado).
-- **Listas rápidas**: próximas contas a pagar e a receber a vencer, clicáveis, abrindo o registro exato em Financeiro (mesmo deep link já usado na Conciliação).
+Hoje cada registro pertence ao usuário que o criou (`user_id`) e as regras de acesso só liberam as próprias linhas — dois usuários veem dados diferentes. Vou transformar em base única da empresa:
 
-## 2. Bloqueio de tela por inatividade (PIN)
+- Regras de acesso: qualquer usuário autenticado passa a ver, criar, editar e excluir os registros de todas as tabelas (bancos, categorias, meios de pagamento, clientes, fornecedores, profissionais, serviços, produtos, vendas, contas a pagar/receber, transferências, inventário, equipamentos, peças).
+- `user_id` continua sendo gravado apenas como "quem cadastrou" (histórico), deixa de filtrar as consultas.
+- Nenhum dado existente é apagado: os registros já cadastrados passam a ser visíveis para todos.
 
-- Após 2 minutos sem mouse, teclado, toque ou scroll, a aplicação exibe uma tela de bloqueio em tela cheia (blur sobre o conteúdo, relógio, nome/e-mail do usuário, campo de PIN e botão "Sair").
-- O PIN também é exigido **logo após o login**, inclusive no login com Google, antes de liberar qualquer tela protegida.
-- O desbloqueio é validado no servidor: o PIN (01235) fica guardado como segredo do backend, nunca no código do navegador. A comparação é feita de forma segura e o estado "desbloqueado" fica numa sessão assinada, com limite de tentativas para evitar força bruta.
-- O bloqueio cobre todas as telas internas (fica no layout autenticado), portanto vale para todos os menus automaticamente.
+Observação: com isso todos os usuários logados têm acesso total. Se depois quiser restringir por função (admin/financeiro/leitura), a tabela de papéis já existe e podemos usar as permissões em Configurações.
 
-Observação: como é um PIN único do sistema (não por usuário), ele funciona como trava de estação de trabalho, não como autenticação individual — o login continua sendo o Google/e-mail.
+## 2. Atualização em tempo real
 
-## 3. Auditoria de data e hora em todo o sistema
+- Ativar realtime no banco para todas as tabelas do sistema.
+- Um listener central assina as mudanças e invalida os dados em cache, então qualquer cadastro/alteração feita por uma pessoa aparece automaticamente nas telas abertas das outras (Painel, Financeiro, Conciliação, Vendas, Patrimônio, Configurações) sem recarregar a página.
+- Um único canal global (montado no layout autenticado) para evitar múltiplas assinaturas e consumo desnecessário.
 
-O banco já grava `created_at` e `updated_at` automaticamente em todas as tabelas (gatilhos verificados). O que falta é registrar **quem** fez e **mostrar** isso nas telas:
+## 3. E-mail de quem criou/alterou
 
-- Migração: adicionar `created_by` e `updated_by` onde ainda não existem (clientes, bancos, produtos, servicos, profissionais, vendas_produtos, vendas_servicos, transferencias, inventario, contas_pagar/receber já têm `updated_by`), preenchendo automaticamente com o usuário logado via gatilho.
-- Padronizar todos os formulários (CRUD genérico, Financeiro, Vendas, Inventário, Patrimônio, Configurações) para gravar esses campos.
-- Exibir em todos os modais de detalhe um bloco **"Registro"**: Criado em dd/mm/aaaa hh:mm por Fulano · Última alteração dd/mm/aaaa hh:mm por Fulano.
-- Adicionar coluna opcional "Última alteração" nas tabelas de listagem, e formatador de data+hora compartilhado em `src/lib/format.ts`.
+- Guardar o e-mail do usuário em `profiles` (preenchido no cadastro/login, inclusive Google, e para os usuários já existentes).
+- O bloco "Registro" nos modais de detalhe/edição passa a mostrar:
+  - Criado em dd/mm/aaaa hh:mm por email@dominio.com
+  - Última alteração dd/mm/aaaa hh:mm por email@dominio.com
+- A coluna "Última alteração" das listagens ganha o e-mail junto da data.
+- Funciona em todos os módulos: cadastros genéricos, Financeiro, Vendas, Inventário, Equipamentos, Peças, Bancos, Transferências e Configurações.
 
 ## Detalhes técnicos
 
-- Painel: uma única query agregada por período, reaproveitando as mesmas consultas usadas em Financeiro para não divergir números.
-- Bloqueio: `SITE_PIN` + `SESSION_SECRET` como segredos do backend; server function `unlockScreen`/`lockScreen` com comparação em tempo constante e sessão criptografada; componente `ScreenLockProvider` montado em `src/routes/_authenticated/route.tsx` com listeners de atividade e `visibilitychange`.
-- Auditoria: gatilho `set_audit_fields()` usando `auth.uid()` para `created_by`/`updated_by`, mais join leve em `profiles` para exibir o nome.
+- Migração: substituir as políticas `auth.uid() = user_id` por políticas `TO authenticated` com `using (true)`; manter GRANTs; adicionar coluna `email` em `profiles` + atualizar `handle_new_user()`; `ALTER PUBLICATION supabase_realtime ADD TABLE ...` para cada tabela.
+- Front: remover dependência de `user_id` nos filtros de leitura; hook `useRealtimeSync()` com `supabase.channel(...).on('postgres_changes', ...)` → `queryClient.invalidateQueries()`, com cleanup no unmount.
+- Auditoria: hook compartilhado que carrega o mapa `id → email` de `profiles` e é consumido por `AuditInfo` e pelas tabelas de listagem.
