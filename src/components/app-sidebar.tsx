@@ -28,7 +28,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 
 const items = [
-  { title: "DASHBOARD", url: "/painel", icon: LayoutDashboard },
+  { title: "Dashboard", url: "/painel", icon: LayoutDashboard },
   { title: "Vendas", url: "/vendas", icon: ShoppingCart },
   { title: "Financeiro", url: "/financeiro", icon: Wallet },
   { title: "Clientes", url: "/clientes", icon: Users },
