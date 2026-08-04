@@ -21,6 +21,7 @@ import { Route as AuthenticatedFinanceiroRouteImport } from './routes/_authentic
 import { Route as AuthenticatedEstoqueRouteImport } from './routes/_authenticated/estoque'
 import { Route as AuthenticatedConciliacaoRouteImport } from './routes/_authenticated/conciliacao'
 import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticated/clientes'
+import { Route as AuthenticatedCategoriasRouteImport } from './routes/_authenticated/categorias'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -83,10 +84,16 @@ const AuthenticatedClientesRoute = AuthenticatedClientesRouteImport.update({
   path: '/clientes',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedCategoriasRoute = AuthenticatedCategoriasRouteImport.update({
+  id: '/categorias',
+  path: '/categorias',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/categorias': typeof AuthenticatedCategoriasRoute
   '/clientes': typeof AuthenticatedClientesRoute
   '/conciliacao': typeof AuthenticatedConciliacaoRoute
   '/estoque': typeof AuthenticatedEstoqueRoute
@@ -100,6 +107,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/categorias': typeof AuthenticatedCategoriasRoute
   '/clientes': typeof AuthenticatedClientesRoute
   '/conciliacao': typeof AuthenticatedConciliacaoRoute
   '/estoque': typeof AuthenticatedEstoqueRoute
@@ -115,6 +123,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/categorias': typeof AuthenticatedCategoriasRoute
   '/_authenticated/clientes': typeof AuthenticatedClientesRoute
   '/_authenticated/conciliacao': typeof AuthenticatedConciliacaoRoute
   '/_authenticated/estoque': typeof AuthenticatedEstoqueRoute
@@ -130,6 +139,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/categorias'
     | '/clientes'
     | '/conciliacao'
     | '/estoque'
@@ -143,6 +153,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/categorias'
     | '/clientes'
     | '/conciliacao'
     | '/estoque'
@@ -157,6 +168,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/categorias'
     | '/_authenticated/clientes'
     | '/_authenticated/conciliacao'
     | '/_authenticated/estoque'
@@ -260,10 +272,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClientesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/categorias': {
+      id: '/_authenticated/categorias'
+      path: '/categorias'
+      fullPath: '/categorias'
+      preLoaderRoute: typeof AuthenticatedCategoriasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedCategoriasRoute: typeof AuthenticatedCategoriasRoute
   AuthenticatedClientesRoute: typeof AuthenticatedClientesRoute
   AuthenticatedConciliacaoRoute: typeof AuthenticatedConciliacaoRoute
   AuthenticatedEstoqueRoute: typeof AuthenticatedEstoqueRoute
@@ -276,6 +296,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedCategoriasRoute: AuthenticatedCategoriasRoute,
   AuthenticatedClientesRoute: AuthenticatedClientesRoute,
   AuthenticatedConciliacaoRoute: AuthenticatedConciliacaoRoute,
   AuthenticatedEstoqueRoute: AuthenticatedEstoqueRoute,
