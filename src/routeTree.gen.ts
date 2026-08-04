@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedVendasRouteImport } from './routes/_authenticated/vendas'
 import { Route as AuthenticatedServicosRouteImport } from './routes/_authenticated/servicos'
 import { Route as AuthenticatedProfissionaisRouteImport } from './routes/_authenticated/profissionais'
+import { Route as AuthenticatedPecasRouteImport } from './routes/_authenticated/pecas'
 import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
 import { Route as AuthenticatedMeiosPagamentoRouteImport } from './routes/_authenticated/meios-pagamento'
 import { Route as AuthenticatedInventarioRouteImport } from './routes/_authenticated/inventario'
@@ -56,6 +57,11 @@ const AuthenticatedProfissionaisRoute =
     path: '/profissionais',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedPecasRoute = AuthenticatedPecasRouteImport.update({
+  id: '/pecas',
+  path: '/pecas',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPainelRoute = AuthenticatedPainelRouteImport.update({
   id: '/painel',
   path: '/painel',
@@ -124,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/inventario': typeof AuthenticatedInventarioRoute
   '/meios-pagamento': typeof AuthenticatedMeiosPagamentoRoute
   '/painel': typeof AuthenticatedPainelRoute
+  '/pecas': typeof AuthenticatedPecasRoute
   '/profissionais': typeof AuthenticatedProfissionaisRoute
   '/servicos': typeof AuthenticatedServicosRoute
   '/vendas': typeof AuthenticatedVendasRoute
@@ -141,6 +148,7 @@ export interface FileRoutesByTo {
   '/inventario': typeof AuthenticatedInventarioRoute
   '/meios-pagamento': typeof AuthenticatedMeiosPagamentoRoute
   '/painel': typeof AuthenticatedPainelRoute
+  '/pecas': typeof AuthenticatedPecasRoute
   '/profissionais': typeof AuthenticatedProfissionaisRoute
   '/servicos': typeof AuthenticatedServicosRoute
   '/vendas': typeof AuthenticatedVendasRoute
@@ -160,6 +168,7 @@ export interface FileRoutesById {
   '/_authenticated/inventario': typeof AuthenticatedInventarioRoute
   '/_authenticated/meios-pagamento': typeof AuthenticatedMeiosPagamentoRoute
   '/_authenticated/painel': typeof AuthenticatedPainelRoute
+  '/_authenticated/pecas': typeof AuthenticatedPecasRoute
   '/_authenticated/profissionais': typeof AuthenticatedProfissionaisRoute
   '/_authenticated/servicos': typeof AuthenticatedServicosRoute
   '/_authenticated/vendas': typeof AuthenticatedVendasRoute
@@ -179,6 +188,7 @@ export interface FileRouteTypes {
     | '/inventario'
     | '/meios-pagamento'
     | '/painel'
+    | '/pecas'
     | '/profissionais'
     | '/servicos'
     | '/vendas'
@@ -196,6 +206,7 @@ export interface FileRouteTypes {
     | '/inventario'
     | '/meios-pagamento'
     | '/painel'
+    | '/pecas'
     | '/profissionais'
     | '/servicos'
     | '/vendas'
@@ -214,6 +225,7 @@ export interface FileRouteTypes {
     | '/_authenticated/inventario'
     | '/_authenticated/meios-pagamento'
     | '/_authenticated/painel'
+    | '/_authenticated/pecas'
     | '/_authenticated/profissionais'
     | '/_authenticated/servicos'
     | '/_authenticated/vendas'
@@ -267,6 +279,13 @@ declare module '@tanstack/react-router' {
       path: '/profissionais'
       fullPath: '/profissionais'
       preLoaderRoute: typeof AuthenticatedProfissionaisRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/pecas': {
+      id: '/_authenticated/pecas'
+      path: '/pecas'
+      fullPath: '/pecas'
+      preLoaderRoute: typeof AuthenticatedPecasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/painel': {
@@ -353,6 +372,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedInventarioRoute: typeof AuthenticatedInventarioRoute
   AuthenticatedMeiosPagamentoRoute: typeof AuthenticatedMeiosPagamentoRoute
   AuthenticatedPainelRoute: typeof AuthenticatedPainelRoute
+  AuthenticatedPecasRoute: typeof AuthenticatedPecasRoute
   AuthenticatedProfissionaisRoute: typeof AuthenticatedProfissionaisRoute
   AuthenticatedServicosRoute: typeof AuthenticatedServicosRoute
   AuthenticatedVendasRoute: typeof AuthenticatedVendasRoute
@@ -369,6 +389,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedInventarioRoute: AuthenticatedInventarioRoute,
   AuthenticatedMeiosPagamentoRoute: AuthenticatedMeiosPagamentoRoute,
   AuthenticatedPainelRoute: AuthenticatedPainelRoute,
+  AuthenticatedPecasRoute: AuthenticatedPecasRoute,
   AuthenticatedProfissionaisRoute: AuthenticatedProfissionaisRoute,
   AuthenticatedServicosRoute: AuthenticatedServicosRoute,
   AuthenticatedVendasRoute: AuthenticatedVendasRoute,
