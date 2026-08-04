@@ -64,8 +64,8 @@ export function AppSidebar() {
           </div>
           {!collapsed && (
             <div className="min-w-0">
-              <div className="text-sm font-bold tracking-tight">Gestão</div>
-              <div className="text-[10px] text-muted-foreground truncate">Sistema comercial</div>
+              <div className="text-sm font-bold tracking-tight uppercase">FINANCEIRO</div>
+              <div className="text-[10px] text-muted-foreground truncate">MEARIM DRONES LTDA</div>
             </div>
           )}
         </div>
