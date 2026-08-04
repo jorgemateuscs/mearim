@@ -79,8 +79,8 @@ function AuthPage() {
             <LayoutDashboard className="h-6 w-6 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-tight">Gestão</h1>
-            <p className="text-xs text-muted-foreground">Sistema de gestão comercial</p>
+            <h1 className="text-xl font-bold tracking-tight uppercase">FINANCEIRO</h1>
+            <p className="text-xs text-muted-foreground">MEARIM DRONES LTDA</p>
           </div>
         </div>
 
