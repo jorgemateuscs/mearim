@@ -164,7 +164,7 @@ function PainelPage() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Painel</h1>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">DASHBOARD</h1>
         <p className="text-sm text-muted-foreground">Visão geral do seu negócio</p>
       </header>
 
