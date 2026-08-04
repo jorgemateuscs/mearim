@@ -10,6 +10,12 @@ import {
   Landmark,
   Boxes,
   LogOut,
+  Tags,
+  Truck,
+  CreditCard,
+  Cpu,
+  Cog,
+  Settings,
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -27,16 +33,48 @@ import {
 } from "@/components/ui/sidebar";
 import { supabase } from "@/integrations/supabase/client";
 
-const items = [
-  { title: "Dashboard", url: "/painel", icon: LayoutDashboard },
-  { title: "Vendas", url: "/vendas", icon: ShoppingCart },
-  { title: "Financeiro", url: "/financeiro", icon: Wallet },
-  { title: "Clientes", url: "/clientes", icon: Users },
-  { title: "Profissionais", url: "/profissionais", icon: UserCog },
-  { title: "Serviços", url: "/servicos", icon: Wrench },
-  { title: "Estoque", url: "/estoque", icon: Package },
-  { title: "Inventário", url: "/inventario", icon: Boxes },
-  { title: "Conciliação", url: "/conciliacao", icon: Landmark },
+const groups: { label: string; items: { title: string; url: string; icon: any }[] }[] = [
+  {
+    label: "Visão geral",
+    items: [{ title: "Dashboard", url: "/painel", icon: LayoutDashboard }],
+  },
+  {
+    label: "Comercial",
+    items: [
+      { title: "Vendas", url: "/vendas", icon: ShoppingCart },
+      { title: "Estoque", url: "/estoque", icon: Package },
+      { title: "Serviços", url: "/servicos", icon: Wrench },
+    ],
+  },
+  {
+    label: "Financeiro",
+    items: [
+      { title: "Financeiro", url: "/financeiro", icon: Wallet },
+      { title: "Conciliação", url: "/conciliacao", icon: Landmark },
+      { title: "Categorias", url: "/categorias", icon: Tags },
+      { title: "Meios de pagamento", url: "/meios-pagamento", icon: CreditCard },
+    ],
+  },
+  {
+    label: "Pessoas",
+    items: [
+      { title: "Clientes", url: "/clientes", icon: Users },
+      { title: "Profissionais", url: "/profissionais", icon: UserCog },
+      { title: "Fornecedores", url: "/fornecedores", icon: Truck },
+    ],
+  },
+  {
+    label: "Patrimônio",
+    items: [
+      { title: "Inventário", url: "/inventario", icon: Boxes },
+      { title: "Equipamentos", url: "/equipamentos", icon: Cpu },
+      { title: "Peças", url: "/pecas", icon: Cog },
+    ],
+  },
+  {
+    label: "Sistema",
+    items: [{ title: "Configurações", url: "/configuracoes", icon: Settings }],
+  },
 ];
 
 export function AppSidebar() {
@@ -72,23 +110,25 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Menu</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-                    <Link to={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {groups.map((group) => (
+          <SidebarGroup key={group.label}>
+            <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map((item) => (
+                  <SidebarMenuItem key={item.url}>
+                    <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
+                      <Link to={item.url}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border">
