@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { formatBRL, formatDate } from "@/lib/format";
 import { AuditInfo } from "@/components/audit-info";
+import { CategoriaNomeSelect, useCategorias } from "@/components/lookup-select";
 import { Plus, Pencil, Trash2, Boxes } from "lucide-react";
 import { toast } from "sonner";
 
@@ -22,11 +23,6 @@ export const Route = createFileRoute("/_authenticated/inventario")({
   component: InventarioPage,
 });
 
-const CATEGORIAS = [
-  { value: "peca", label: "Peça" },
-  { value: "equipamento", label: "Equipamento" },
-];
-
 const STATUS = [
   { value: "pago", label: "Pago", cls: "bg-emerald-500/15 text-emerald-500 border-emerald-500/30" },
   { value: "parcial", label: "Pago parcialmente", cls: "bg-amber-500/15 text-amber-500 border-amber-500/30" },
@@ -34,7 +30,7 @@ const STATUS = [
 ];
 
 function statusInfo(s: string) { return STATUS.find((x) => x.value === s) ?? { value: s, label: s, cls: "bg-muted" }; }
-function categoriaLabel(c: string) { return CATEGORIAS.find((x) => x.value === c)?.label ?? c; }
+function categoriaLabel(c: string | null) { return c || "—"; }
 
 function InventarioPage() {
   const qc = useQueryClient();
@@ -43,6 +39,7 @@ function InventarioPage() {
   const [filtroCat, setFiltroCat] = useState<string>("todas");
   const [filtroStatus, setFiltroStatus] = useState<string>("todos");
   const [detalhe, setDetalhe] = useState<any | null>(null);
+  const { data: categorias = [] } = useCategorias(["estoque", "patrimonio"]);
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["inventario"],
@@ -119,7 +116,7 @@ function InventarioPage() {
             <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="todas">Todas</SelectItem>
-              {CATEGORIAS.map((c) => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
+              {categorias.map((c) => <SelectItem key={c.id} value={c.nome}>{c.nome}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
@@ -231,7 +228,7 @@ function Info({ label, value }: { label: string; value: string }) {
 function InventarioForm({ editing, onSubmit, loading }: { editing: any | null; onSubmit: (v: any) => void; loading: boolean }) {
   const [v, setV] = useState<any>(() => ({
     nome: editing?.nome ?? "",
-    categoria: editing?.categoria ?? "peca",
+    categoria: editing?.categoria ?? "",
     descricao: editing?.descricao ?? "",
     quantidade: editing?.quantidade ?? 1,
     valor_total: editing?.valor_total ?? "",
@@ -253,10 +250,7 @@ function InventarioForm({ editing, onSubmit, loading }: { editing: any | null; o
         <div className="col-span-2"><Label>Nome *</Label><Input required value={v.nome} onChange={(e) => setV({ ...v, nome: e.target.value })} /></div>
         <div>
           <Label>Categoria *</Label>
-          <Select value={v.categoria} onValueChange={(c) => setV({ ...v, categoria: c })}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>{CATEGORIAS.map((c) => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}</SelectContent>
-          </Select>
+          <CategoriaNomeSelect tipos={["estoque", "patrimonio"]} value={v.categoria} onChange={(n) => setV({ ...v, categoria: n ?? "" })} />
         </div>
         <div><Label>Data de aquisição</Label><Input type="date" value={v.data_aquisicao} onChange={(e) => setV({ ...v, data_aquisicao: e.target.value })} /></div>
         <div><Label>Quantidade *</Label><Input type="number" step="1" min="1" required value={v.quantidade} onChange={(e) => setV({ ...v, quantidade: e.target.value })} /></div>

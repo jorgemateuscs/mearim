@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { EntitySelect } from "@/components/entity-select";
+import { MeioPagamentoNomeSelect } from "@/components/lookup-select";
 import { formatBRL, formatDate } from "@/lib/format";
 import { Plus, Pencil, Trash2, Package, Scissors } from "lucide-react";
 import { toast } from "sonner";
@@ -226,7 +227,7 @@ function VendaProdutoForm({ editing, onSubmit, loading }: { editing: any | null;
         <div><Label>Quantidade *</Label><Input type="number" min="1" required value={v.quantidade} onChange={(e) => setV({ ...v, quantidade: e.target.value })} /></div>
         <div><Label>Valor unitário *</Label><Input type="number" step="0.01" required value={v.valor_unitario} onChange={(e) => setV({ ...v, valor_unitario: e.target.value })} /></div>
         <div><Label>Custo unitário</Label><Input type="number" step="0.01" value={v.custo_unitario} onChange={(e) => setV({ ...v, custo_unitario: e.target.value })} /></div>
-        <div><Label>Forma de pagamento</Label><Input value={v.forma_pagamento} onChange={(e) => setV({ ...v, forma_pagamento: e.target.value })} /></div>
+        <div><Label>Forma de pagamento</Label><MeioPagamentoNomeSelect value={v.forma_pagamento} onChange={(n) => setV({ ...v, forma_pagamento: n ?? "" })} /></div>
         <div><Label>Local do recebimento</Label><Input value={v.local_recebimento} onChange={(e) => setV({ ...v, local_recebimento: e.target.value })} /></div>
         <div className="flex items-end"><div className="w-full rounded-md bg-muted/40 px-3 py-2 text-sm"><span className="text-muted-foreground">Total: </span><span className="font-semibold">{formatBRL(total)}</span></div></div>
         <div className="col-span-2"><Label>Observação</Label><Textarea rows={2} value={v.observacao} onChange={(e) => setV({ ...v, observacao: e.target.value })} /></div>
