@@ -316,7 +316,7 @@ function ContasReceber({ focusId }: { focusId?: string }) {
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["contas_receber_full"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("contas_receber").select("*, clientes(nome), bancos(nome)").order("data_vencimento", { ascending: false });
+      const { data, error } = await supabase.from("contas_receber").select("*, clientes(nome), bancos(nome), categorias(nome), meios_pagamento(nome)").order("data_vencimento", { ascending: false });
       if (error) throw error;
       return data as any[];
     },
@@ -341,6 +341,8 @@ function ContasReceber({ focusId }: { focusId?: string }) {
         valor_recebido: v.valor_recebido === "" ? null : Number(v.valor_recebido),
         status: v.status || "pendente",
         local_recebimento: v.local_recebimento || null,
+        categoria_id: v.categoria_id || null,
+        meio_pagamento_id: v.meio_pagamento_id || null,
         banco_id: v.banco_id || null,
         observacao: v.observacao || null,
       };
@@ -470,6 +472,8 @@ function ContasReceber({ focusId }: { focusId?: string }) {
               <Info label="Valor da parcela" value={formatBRL(Number(detalhe.valor_parcela ?? 0))} />
               <Info label="Data de recebimento" value={detalhe.data_recebimento ? formatDate(detalhe.data_recebimento) : "—"} />
               <Info label="Valor recebido" value={detalhe.valor_recebido != null ? formatBRL(Number(detalhe.valor_recebido)) : "—"} />
+              <Info label="Categoria" value={detalhe.categorias?.nome || "—"} />
+              <Info label="Forma de recebimento" value={detalhe.meios_pagamento?.nome || detalhe.local_recebimento || "—"} />
               <Info label="Banco" value={detalhe.bancos?.nome || "—"} />
               <Info label="Status" value={statusInfo(detalhe.status).label} />
               <Info label="Observação" value={detalhe.observacao || "—"} />
@@ -501,6 +505,8 @@ function ReceberForm({ editing, onSubmit, loading }: { editing: any | null; onSu
     valor_recebido: editing?.valor_recebido ?? "",
     status: editing?.status ?? "pendente",
     local_recebimento: editing?.local_recebimento ?? "",
+    categoria_id: editing?.categoria_id ?? null,
+    meio_pagamento_id: editing?.meio_pagamento_id ?? null,
     banco_id: editing?.banco_id ?? null,
     observacao: editing?.observacao ?? "",
   }));
@@ -520,6 +526,20 @@ function ReceberForm({ editing, onSubmit, loading }: { editing: any | null; onSu
         <div><Label>Valor da parcela *</Label><Input type="number" step="0.01" required value={v.valor_parcela} onChange={(e) => setV({ ...v, valor_parcela: e.target.value })} /></div>
         <div><Label>Data recebimento</Label><Input type="date" value={v.data_recebimento} onChange={(e) => setV({ ...v, data_recebimento: e.target.value })} /></div>
         <div><Label>Valor recebido</Label><Input type="number" step="0.01" value={v.valor_recebido} onChange={(e) => setV({ ...v, valor_recebido: e.target.value })} /></div>
+        <div><Label>Categoria</Label>
+          <CategoriaSelect
+            tipos={["receita"]}
+            valueId={v.categoria_id}
+            onChange={(id) => setV({ ...v, categoria_id: id })}
+          />
+        </div>
+        <div><Label>Forma de recebimento</Label>
+          <MeioPagamentoSelect
+            valueId={v.meio_pagamento_id}
+            valueNome={v.local_recebimento}
+            onChange={(id, nome) => setV({ ...v, meio_pagamento_id: id, local_recebimento: nome ?? "" })}
+          />
+        </div>
         <div className="col-span-2"><Label>Banco *</Label><EntitySelect table="bancos" value={v.banco_id} onChange={(id) => setV({ ...v, banco_id: id })} /></div>
         <div><Label>Status</Label>
           <Select value={v.status} onValueChange={(s) => setV({ ...v, status: s })}>
