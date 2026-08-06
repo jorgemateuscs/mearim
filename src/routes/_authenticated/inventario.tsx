@@ -59,7 +59,7 @@ function InventarioPage() {
       const valor_pago = v.status_pagamento === "pago" ? valor_total : v.status_pagamento === "pendente" ? 0 : Number(v.valor_pago) || 0;
       const payload = {
         nome: v.nome,
-        categoria: v.categoria,
+        categoria: v.categoria || "Sem categoria",
         descricao: v.descricao || null,
         quantidade: Number(v.quantidade) || 1,
         valor_total,

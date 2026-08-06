@@ -69,7 +69,7 @@ function PainelPage() {
       const [vp, vs, cp, cr, cli, prod] = await Promise.all([
         supabase.from("vendas_produtos").select("data_venda,valor_total,custo_total").gte("data_venda", dataIni).lte("data_venda", dataFim),
         supabase.from("vendas_servicos").select("data_venda,valor_venda,valor_recebido,custo").gte("data_venda", dataIni).lte("data_venda", dataFim),
-        supabase.from("contas_pagar").select("id,descricao,data_vencimento,valor_previsto,valor_pago,status,categoria").gte("data_vencimento", dataIni).lte("data_vencimento", dataFim),
+        supabase.from("contas_pagar").select("id,descricao,data_vencimento,valor_previsto,valor_pago,status,categoria,categoria_id,categorias(nome)").gte("data_vencimento", dataIni).lte("data_vencimento", dataFim),
         supabase.from("contas_receber").select("id,descricao,data_vencimento,valor_parcela,valor_recebido,status,origem_tipo").gte("data_vencimento", dataIni).lte("data_vencimento", dataFim),
         supabase.from("clientes").select("id,data_nascimento,proximo_contato,forma_prospeccao"),
         supabase.from("produtos").select("qtde_adquirida,qtde_vendida,valor_venda,custo_medio"),
@@ -109,6 +109,19 @@ function PainelPage() {
   const proximasReceber = [...receberPend].filter((c) => c.data_vencimento >= today).sort((a, b) => a.data_vencimento.localeCompare(b.data_vencimento)).slice(0, 5);
 
   const meses = useMemo(() => buildMeses(dataIni, dataFim), [dataIni, dataFim]);
+
+  // Gastos por categoria (usa a categoria cadastrada, com fallback para o texto antigo)
+  const gastosPorCategoria = useMemo(() => {
+    const map = new Map<string, number>();
+    ((data?.contasPagar ?? []) as any[]).forEach((c) => {
+      const nome = c.categorias?.nome || c.categoria || "Sem categoria";
+      map.set(nome, (map.get(nome) ?? 0) + Number(c.valor_pago ?? c.valor_previsto ?? 0));
+    });
+    return [...map.entries()]
+      .map(([nome, valor]) => ({ nome, valor }))
+      .sort((a, b) => b.valor - a.valor)
+      .slice(0, 10);
+  }, [data]);
 
   const { receitasMes, despesasMes, lucroMes, receberMes, pagarMes } = useMemo(() => {
     const idx = new Map(meses.map((m, i) => [m.key, i]));
@@ -232,6 +245,29 @@ function PainelPage() {
         receber={receberMes}
         pagar={pagarMes}
       />
+
+      {/* Gastos por categoria */}
+      <Card className="p-5">
+        <div className="text-sm font-medium text-muted-foreground mb-3">Gastos por categoria</div>
+        {gastosPorCategoria.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Nenhuma despesa no período.</p>
+        ) : (
+          <div className="h-56">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={gastosPorCategoria}>
+                <XAxis dataKey="nome" tick={{ fill: "var(--color-muted-foreground)", fontSize: 10 }} axisLine={false} tickLine={false} interval={0} />
+                <Tooltip
+                  cursor={{ fill: "var(--color-muted)", opacity: 0.3 }}
+                  contentStyle={{ background: "var(--color-popover)", border: "1px solid var(--color-border)", borderRadius: 8, fontSize: 12 }}
+                  formatter={(v: number) => formatBRL(v)}
+                  labelStyle={{ color: "var(--color-muted-foreground)" }}
+                />
+                <Bar dataKey="valor" fill="var(--color-chart-4)" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+      </Card>
 
       {/* Próximos vencimentos */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
