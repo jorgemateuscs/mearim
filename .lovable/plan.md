@@ -1,29 +1,33 @@
-# Gráficos de contas a receber x pagar no Dashboard
+# Usar as Categorias e Meios de pagamento cadastrados em todo o sistema
 
-Hoje o Dashboard já tem um gráfico de barras "Contas a receber x contas a pagar (por vencimento)" e KPIs de A receber / A pagar / Vencidos. Falta a visão de **situação** das contas: o que está atrasado, o que vence hoje, o que vence em breve e o que já foi liquidado.
+## O que está acontecendo
 
-## O que será adicionado
+Confirmei nos arquivos: nas telas de **Financeiro** (contas a pagar/receber) e **Vendas**, os campos "Categoria" e "Forma de pagamento" são campos de **texto livre digitado**, não listas ligadas aos cadastros. As colunas corretas (`categoria_id`, `meio_pagamento_id`) existem no banco mas não são preenchidas por essas telas. No **Inventário**, a categoria usa uma lista fixa escrita no código, também sem ligação com o cadastro.
 
-### 1. Gráfico de situação (rosca dupla)
-Dois gráficos de pizza/rosca lado a lado — um para Contas a receber, outro para Contas a pagar — quebrando o valor do período em:
-- Atrasado (vencimento anterior a hoje e não liquidado)
-- Vence hoje
-- A vencer (futuro)
-- Liquidado (recebido / pago)
+Ou seja: o que você cadastra em Categorias e Meios de pagamento nunca é oferecido nas outras telas.
 
-Cada fatia mostra valor em R$ e a legenda traz a quantidade de contas. Clicar numa fatia leva para Financeiro na aba correspondente.
+## O que será feito
 
-### 2. Gráfico de aging (atrasos por faixa)
-Barras horizontais comparando receber x pagar por faixa de atraso: 1–7 dias, 8–15, 16–30, 31–60, 60+ dias. Mostra rapidamente onde está concentrado o atraso.
+### Financeiro (contas a pagar e a receber)
+- Trocar o campo de texto "Categoria" por uma lista suspensa das categorias cadastradas, filtrada pelo tipo certo: **despesa** em contas a pagar, **receita** em contas a receber.
+- Trocar "Forma de pagamento" por lista dos **Meios de pagamento** cadastrados (só os ativos).
+- Passar a gravar `categoria_id` e `meio_pagamento_id`, mantendo o texto antigo salvo para não perder histórico.
+- Na lista e na tela de detalhes, mostrar o nome da categoria/meio de pagamento vindo do cadastro (com fallback para o texto antigo em registros anteriores).
 
-### 3. Evolução previsto x realizado
-Ao lado do gráfico mensal existente, uma linha acumulada por mês: Recebido acumulado x Pago acumulado x Saldo do período — para ver a tendência do fluxo dentro do período filtrado.
+### Vendas (produtos e serviços)
+- "Forma de pagamento" passa a ser lista dos meios de pagamento cadastrados.
 
-Todos os gráficos respeitam o filtro de período (data inicial/final e os botões rápidos) que já existe no topo do Dashboard.
+### Inventário
+- Categoria passa a usar as categorias cadastradas do tipo **estoque/patrimônio**, em vez da lista fixa do código. Os filtros da tela acompanham as categorias reais.
+
+### Dashboard
+- O gráfico de gastos por categoria passa a agrupar pela categoria cadastrada, exibindo o nome oficial.
+
+Nenhum registro atual é apagado ou alterado: os textos já digitados continuam visíveis; a partir de agora as novas seleções vêm dos cadastros.
 
 ## Notas técnicas
 
-- Alterações concentradas em `src/routes/_authenticated/painel.tsx`; sem mudança de banco e sem novas consultas — os dados de `contas_pagar` e `contas_receber` já são carregados pela query `painel`.
-- Novos componentes de gráfico usando `recharts` (`PieChart`, `BarChart` horizontal, `LineChart`), com as cores semânticas dos tokens (`--color-chart-*`, destructive, warning, success).
-- Classificação de situação feita em `useMemo` sobre as listas já existentes, reaproveitando a lógica de status atual (`status !== 'pago' / 'recebido'`).
-- Navegação por clique reutiliza `navigate({ to: "/financeiro", search: { tab, id } })` já usado no card de próximos vencimentos.
+- Reaproveita `src/components/entity-select.tsx` (já usado em Equipamentos e Peças) para os selects, com filtro por `tipo` em `categorias` e `ativo` em `meios_pagamento`.
+- Arquivos afetados: `src/routes/_authenticated/financeiro.tsx`, `vendas.tsx`, `inventario.tsx`, `painel.tsx`.
+- Sem migração de banco: `categoria_id` e `meio_pagamento_id` já existem em `contas_pagar` e `contas_receber`. Para `vendas_*` e `inventario`, que só têm campo texto, a seleção grava o **nome** da opção escolhida — mantendo compatibilidade com os dados atuais.
+- Leituras das listas via query com `qc.invalidateQueries()` global já existente, então cadastrar uma categoria nova a faz aparecer imediatamente nas outras telas.
