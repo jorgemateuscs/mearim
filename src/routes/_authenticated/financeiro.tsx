@@ -14,6 +14,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { EntitySelect } from "@/components/entity-select";
+import { CategoriaSelect, MeioPagamentoSelect } from "@/components/lookup-select";
 import { formatBRL, formatDate } from "@/lib/format";
 import { AuditInfo } from "@/components/audit-info";
 import { Plus, Pencil, Trash2, CheckCircle2, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
@@ -85,7 +86,7 @@ function ContasPagar({ focusId }: { focusId?: string }) {
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["contas_pagar_full"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("contas_pagar").select("*, bancos(nome)").order("data_vencimento", { ascending: false });
+      const { data, error } = await supabase.from("contas_pagar").select("*, bancos(nome), categorias(nome), meios_pagamento(nome)").order("data_vencimento", { ascending: false });
       if (error) throw error;
       return data as any[];
     },
@@ -99,12 +100,14 @@ function ContasPagar({ focusId }: { focusId?: string }) {
       const payload = {
         descricao: v.descricao,
         categoria: v.categoria || null,
+        categoria_id: v.categoria_id || null,
         data_vencimento: v.data_vencimento,
         valor_previsto: Number(v.valor_previsto) || 0,
         data_pagamento: v.data_pagamento || null,
         valor_pago: v.valor_pago === "" ? null : Number(v.valor_pago),
         status: v.status || "pendente",
         forma_pagamento: v.forma_pagamento || null,
+        meio_pagamento_id: v.meio_pagamento_id || null,
         local_saida: v.local_saida || null,
         banco_id: v.banco_id || null,
         observacao: v.observacao || null,
@@ -191,7 +194,7 @@ function ContasPagar({ focusId }: { focusId?: string }) {
                 return (
                   <TableRow key={r.id} className="cursor-pointer" onClick={() => setDetalhe(r)}>
                     <TableCell className="font-medium">{r.descricao}</TableCell>
-                    <TableCell>{r.categoria ?? "—"}</TableCell>
+                    <TableCell>{r.categorias?.nome ?? r.categoria ?? "—"}</TableCell>
                     <TableCell>{formatDate(r.data_vencimento)}</TableCell>
                     <TableCell className="text-right">{formatBRL(Number(r.valor_previsto))}</TableCell>
                     <TableCell className="text-right">{r.valor_pago != null ? formatBRL(Number(r.valor_pago)) : "—"}</TableCell>
@@ -224,12 +227,12 @@ function ContasPagar({ focusId }: { focusId?: string }) {
           <DialogHeader><DialogTitle>{detalhe?.descricao}</DialogTitle></DialogHeader>
           {detalhe && (
             <div className="space-y-2 text-sm">
-              <Info label="Categoria" value={detalhe.categoria || "—"} />
+              <Info label="Categoria" value={detalhe.categorias?.nome || detalhe.categoria || "—"} />
               <Info label="Vencimento" value={formatDate(detalhe.data_vencimento)} />
               <Info label="Valor previsto" value={formatBRL(Number(detalhe.valor_previsto ?? 0))} />
               <Info label="Data de pagamento" value={detalhe.data_pagamento ? formatDate(detalhe.data_pagamento) : "—"} />
               <Info label="Valor pago" value={detalhe.valor_pago != null ? formatBRL(Number(detalhe.valor_pago)) : "—"} />
-              <Info label="Forma de pagamento" value={detalhe.forma_pagamento || "—"} />
+              <Info label="Forma de pagamento" value={detalhe.meios_pagamento?.nome || detalhe.forma_pagamento || "—"} />
               <Info label="Banco" value={detalhe.bancos?.nome || "—"} />
               <Info label="Status" value={statusInfo(detalhe.status).label} />
               <Info label="Observação" value={detalhe.observacao || "—"} />
@@ -250,12 +253,14 @@ function PagarForm({ editing, onSubmit, loading }: { editing: any | null; onSubm
   const [v, setV] = useState<any>(() => ({
     descricao: editing?.descricao ?? "",
     categoria: editing?.categoria ?? "",
+    categoria_id: editing?.categoria_id ?? null,
     data_vencimento: editing?.data_vencimento ?? new Date().toISOString().slice(0, 10),
     valor_previsto: editing?.valor_previsto ?? "",
     data_pagamento: editing?.data_pagamento ?? "",
     valor_pago: editing?.valor_pago ?? "",
     status: editing?.status ?? "pendente",
     forma_pagamento: editing?.forma_pagamento ?? "",
+    meio_pagamento_id: editing?.meio_pagamento_id ?? null,
     local_saida: editing?.local_saida ?? "",
     banco_id: editing?.banco_id ?? null,
     observacao: editing?.observacao ?? "",
@@ -266,7 +271,14 @@ function PagarForm({ editing, onSubmit, loading }: { editing: any | null; onSubm
       <DialogHeader><DialogTitle>{editing ? "Editar conta" : "Nova conta a pagar"}</DialogTitle></DialogHeader>
       <form onSubmit={(e) => { e.preventDefault(); onSubmit(v); }} className="grid grid-cols-2 gap-4 pt-2">
         <div className="col-span-2"><Label>Descrição *</Label><Input required value={v.descricao} onChange={(e) => setV({ ...v, descricao: e.target.value })} /></div>
-        <div><Label>Categoria</Label><Input value={v.categoria} onChange={(e) => setV({ ...v, categoria: e.target.value })} /></div>
+        <div><Label>Categoria</Label>
+          <CategoriaSelect
+            tipos={["despesa"]}
+            valueId={v.categoria_id}
+            valueNome={v.categoria}
+            onChange={(id, nome) => setV({ ...v, categoria_id: id, categoria: nome ?? "" })}
+          />
+        </div>
         <div><Label>Status</Label>
           <Select value={v.status} onValueChange={(s) => setV({ ...v, status: s })}>
             <SelectTrigger><SelectValue /></SelectTrigger>
@@ -277,7 +289,13 @@ function PagarForm({ editing, onSubmit, loading }: { editing: any | null; onSubm
         <div><Label>Valor previsto *</Label><Input type="number" step="0.01" required value={v.valor_previsto} onChange={(e) => setV({ ...v, valor_previsto: e.target.value })} /></div>
         <div><Label>Data pagamento</Label><Input type="date" value={v.data_pagamento} onChange={(e) => setV({ ...v, data_pagamento: e.target.value })} /></div>
         <div><Label>Valor pago</Label><Input type="number" step="0.01" value={v.valor_pago} onChange={(e) => setV({ ...v, valor_pago: e.target.value })} /></div>
-        <div><Label>Forma de pagamento</Label><Input value={v.forma_pagamento} onChange={(e) => setV({ ...v, forma_pagamento: e.target.value })} /></div>
+        <div><Label>Forma de pagamento</Label>
+          <MeioPagamentoSelect
+            valueId={v.meio_pagamento_id}
+            valueNome={v.forma_pagamento}
+            onChange={(id, nome) => setV({ ...v, meio_pagamento_id: id, forma_pagamento: nome ?? "" })}
+          />
+        </div>
         <div><Label>Banco *</Label><EntitySelect table="bancos" value={v.banco_id} onChange={(id) => setV({ ...v, banco_id: id })} /></div>
         <div className="col-span-2"><Label>Observação</Label><Textarea rows={2} value={v.observacao} onChange={(e) => setV({ ...v, observacao: e.target.value })} /></div>
         <DialogFooter className="col-span-2"><Button type="submit" disabled={loading}>{loading ? "Salvando..." : "Salvar"}</Button></DialogFooter>
