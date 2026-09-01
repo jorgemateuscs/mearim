@@ -14,10 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_log: {
+        Row: {
+          acao: string
+          dados_anteriores: Json | null
+          dados_novos: Json | null
+          id: string
+          modulo: string
+          occurred_at: string
+          registro_id: string | null
+          registro_nome: string | null
+          tabela: string
+          user_id: string | null
+        }
+        Insert: {
+          acao: string
+          dados_anteriores?: Json | null
+          dados_novos?: Json | null
+          id?: string
+          modulo: string
+          occurred_at?: string
+          registro_id?: string | null
+          registro_nome?: string | null
+          tabela: string
+          user_id?: string | null
+        }
+        Update: {
+          acao?: string
+          dados_anteriores?: Json | null
+          dados_novos?: Json | null
+          id?: string
+          modulo?: string
+          occurred_at?: string
+          registro_id?: string | null
+          registro_nome?: string | null
+          tabela?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       bancos: {
         Row: {
           created_at: string
           created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           id: string
           nome: string
           saldo_inicial: number
@@ -28,6 +69,8 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           id?: string
           nome: string
           saldo_inicial?: number
@@ -38,6 +81,8 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           id?: string
           nome?: string
           saldo_inicial?: number
@@ -52,6 +97,8 @@ export type Database = {
           ativo: boolean
           created_at: string
           created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           descricao: string | null
           id: string
           nome: string
@@ -64,6 +111,8 @@ export type Database = {
           ativo?: boolean
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           descricao?: string | null
           id?: string
           nome: string
@@ -76,6 +125,8 @@ export type Database = {
           ativo?: boolean
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           descricao?: string | null
           id?: string
           nome?: string
@@ -93,6 +144,8 @@ export type Database = {
           created_at: string
           created_by: string | null
           data_nascimento: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           dias_proximo_contato: number | null
           forma_prospeccao: string | null
           id: string
@@ -112,6 +165,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           data_nascimento?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           dias_proximo_contato?: number | null
           forma_prospeccao?: string | null
           id?: string
@@ -131,6 +186,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           data_nascimento?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           dias_proximo_contato?: number | null
           forma_prospeccao?: string | null
           id?: string
@@ -155,6 +212,8 @@ export type Database = {
           created_by: string | null
           data_pagamento: string | null
           data_vencimento: string
+          deleted_at: string | null
+          deleted_by: string | null
           descricao: string
           forma_pagamento: string | null
           id: string
@@ -163,12 +222,17 @@ export type Database = {
           observacao: string | null
           origem_id: string | null
           origem_tipo: Database["public"]["Enums"]["movimentacao_origem"] | null
+          parcela_num: number | null
+          parcela_total: number | null
+          parcelamento_id: string | null
+          parcelamento_modo: string | null
           status: string
           updated_at: string
           updated_by: string | null
           user_id: string
           valor_pago: number | null
           valor_previsto: number
+          valor_total_parcelamento: number | null
         }
         Insert: {
           banco_id?: string | null
@@ -178,6 +242,8 @@ export type Database = {
           created_by?: string | null
           data_pagamento?: string | null
           data_vencimento: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           descricao: string
           forma_pagamento?: string | null
           id?: string
@@ -188,12 +254,17 @@ export type Database = {
           origem_tipo?:
             | Database["public"]["Enums"]["movimentacao_origem"]
             | null
+          parcela_num?: number | null
+          parcela_total?: number | null
+          parcelamento_id?: string | null
+          parcelamento_modo?: string | null
           status?: string
           updated_at?: string
           updated_by?: string | null
           user_id: string
           valor_pago?: number | null
           valor_previsto?: number
+          valor_total_parcelamento?: number | null
         }
         Update: {
           banco_id?: string | null
@@ -203,6 +274,8 @@ export type Database = {
           created_by?: string | null
           data_pagamento?: string | null
           data_vencimento?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           descricao?: string
           forma_pagamento?: string | null
           id?: string
@@ -213,12 +286,17 @@ export type Database = {
           origem_tipo?:
             | Database["public"]["Enums"]["movimentacao_origem"]
             | null
+          parcela_num?: number | null
+          parcela_total?: number | null
+          parcelamento_id?: string | null
+          parcelamento_modo?: string | null
           status?: string
           updated_at?: string
           updated_by?: string | null
           user_id?: string
           valor_pago?: number | null
           valor_previsto?: number
+          valor_total_parcelamento?: number | null
         }
         Relationships: [
           {
@@ -256,6 +334,8 @@ export type Database = {
           data_recebimento: string | null
           data_vencimento: string
           data_venda: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           descricao: string
           id: string
           local_recebimento: string | null
@@ -265,12 +345,17 @@ export type Database = {
           origem_tipo: Database["public"]["Enums"]["movimentacao_origem"] | null
           pagador_nome: string | null
           parcela: string | null
+          parcela_num: number | null
+          parcela_total: number | null
+          parcelamento_id: string | null
+          parcelamento_modo: string | null
           status: string
           updated_at: string
           updated_by: string | null
           user_id: string
           valor_parcela: number
           valor_recebido: number | null
+          valor_total_parcelamento: number | null
         }
         Insert: {
           banco_id?: string | null
@@ -283,6 +368,8 @@ export type Database = {
           data_recebimento?: string | null
           data_vencimento: string
           data_venda?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           descricao: string
           id?: string
           local_recebimento?: string | null
@@ -294,12 +381,17 @@ export type Database = {
             | null
           pagador_nome?: string | null
           parcela?: string | null
+          parcela_num?: number | null
+          parcela_total?: number | null
+          parcelamento_id?: string | null
+          parcelamento_modo?: string | null
           status?: string
           updated_at?: string
           updated_by?: string | null
           user_id: string
           valor_parcela?: number
           valor_recebido?: number | null
+          valor_total_parcelamento?: number | null
         }
         Update: {
           banco_id?: string | null
@@ -312,6 +404,8 @@ export type Database = {
           data_recebimento?: string | null
           data_vencimento?: string
           data_venda?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           descricao?: string
           id?: string
           local_recebimento?: string | null
@@ -323,12 +417,17 @@ export type Database = {
             | null
           pagador_nome?: string | null
           parcela?: string | null
+          parcela_num?: number | null
+          parcela_total?: number | null
+          parcelamento_id?: string | null
+          parcelamento_modo?: string | null
           status?: string
           updated_at?: string
           updated_by?: string | null
           user_id?: string
           valor_parcela?: number
           valor_recebido?: number | null
+          valor_total_parcelamento?: number | null
         }
         Relationships: [
           {
@@ -369,6 +468,8 @@ export type Database = {
           created_at: string
           created_by: string | null
           data_compra: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           fornecedor_id: string | null
           id: string
           marca: string | null
@@ -391,6 +492,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           data_compra?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           fornecedor_id?: string | null
           id?: string
           marca?: string | null
@@ -413,6 +516,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           data_compra?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           fornecedor_id?: string | null
           id?: string
           marca?: string | null
@@ -458,6 +563,8 @@ export type Database = {
           contato: string | null
           created_at: string
           created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           documento: string | null
           email: string | null
           endereco: string | null
@@ -473,6 +580,8 @@ export type Database = {
           contato?: string | null
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           documento?: string | null
           email?: string | null
           endereco?: string | null
@@ -488,6 +597,8 @@ export type Database = {
           contato?: string | null
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           documento?: string | null
           email?: string | null
           endereco?: string | null
@@ -502,66 +613,218 @@ export type Database = {
       }
       inventario: {
         Row: {
+          banco_id: string | null
           categoria: string
+          categoria_id: string | null
           created_at: string
           created_by: string | null
           data_aquisicao: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           descricao: string | null
           fornecedor: string | null
+          fornecedor_id: string | null
           id: string
+          is_kit: boolean
+          kit_id: string | null
+          localizacao: string | null
+          marca: string | null
+          modelo: string | null
           nome: string
+          numero_patrimonio: string | null
+          numero_serie: string | null
           observacao: string | null
+          origem: string | null
           quantidade: number
+          responsavel: string | null
+          situacao: string | null
           status_pagamento: string
+          tipo: string | null
           updated_at: string
           updated_by: string | null
           user_id: string
           valor_pago: number
           valor_total: number
+          valor_unitario: number | null
         }
         Insert: {
+          banco_id?: string | null
           categoria?: string
+          categoria_id?: string | null
           created_at?: string
           created_by?: string | null
           data_aquisicao?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           descricao?: string | null
           fornecedor?: string | null
+          fornecedor_id?: string | null
           id?: string
+          is_kit?: boolean
+          kit_id?: string | null
+          localizacao?: string | null
+          marca?: string | null
+          modelo?: string | null
           nome: string
+          numero_patrimonio?: string | null
+          numero_serie?: string | null
           observacao?: string | null
+          origem?: string | null
           quantidade?: number
+          responsavel?: string | null
+          situacao?: string | null
           status_pagamento?: string
+          tipo?: string | null
           updated_at?: string
           updated_by?: string | null
           user_id: string
           valor_pago?: number
           valor_total?: number
+          valor_unitario?: number | null
         }
         Update: {
+          banco_id?: string | null
           categoria?: string
+          categoria_id?: string | null
           created_at?: string
           created_by?: string | null
           data_aquisicao?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           descricao?: string | null
           fornecedor?: string | null
+          fornecedor_id?: string | null
           id?: string
+          is_kit?: boolean
+          kit_id?: string | null
+          localizacao?: string | null
+          marca?: string | null
+          modelo?: string | null
           nome?: string
+          numero_patrimonio?: string | null
+          numero_serie?: string | null
           observacao?: string | null
+          origem?: string | null
           quantidade?: number
+          responsavel?: string | null
+          situacao?: string | null
           status_pagamento?: string
+          tipo?: string | null
           updated_at?: string
           updated_by?: string | null
           user_id?: string
           valor_pago?: number
           valor_total?: number
+          valor_unitario?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "inventario_kit_fk"
+            columns: ["kit_id"]
+            isOneToOne: false
+            referencedRelation: "inventario"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventario_movimentacoes: {
+        Row: {
+          cliente_id: string | null
+          created_at: string
+          created_by: string | null
+          data_movimentacao: string
+          destino: string | null
+          fornecedor_id: string | null
+          id: string
+          inventario_id: string
+          motivo: string | null
+          nota_fiscal: string | null
+          observacao: string | null
+          quantidade: number
+          quantidade_anterior: number | null
+          quantidade_final: number | null
+          situacao_final: string | null
+          tipo_movimentacao: string
+          updated_at: string
+          updated_by: string | null
+          user_id: string
+          valor_unitario: number | null
+        }
+        Insert: {
+          cliente_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_movimentacao?: string
+          destino?: string | null
+          fornecedor_id?: string | null
+          id?: string
+          inventario_id: string
+          motivo?: string | null
+          nota_fiscal?: string | null
+          observacao?: string | null
+          quantidade?: number
+          quantidade_anterior?: number | null
+          quantidade_final?: number | null
+          situacao_final?: string | null
+          tipo_movimentacao: string
+          updated_at?: string
+          updated_by?: string | null
+          user_id: string
+          valor_unitario?: number | null
+        }
+        Update: {
+          cliente_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_movimentacao?: string
+          destino?: string | null
+          fornecedor_id?: string | null
+          id?: string
+          inventario_id?: string
+          motivo?: string | null
+          nota_fiscal?: string | null
+          observacao?: string | null
+          quantidade?: number
+          quantidade_anterior?: number | null
+          quantidade_final?: number | null
+          situacao_final?: string | null
+          tipo_movimentacao?: string
+          updated_at?: string
+          updated_by?: string | null
+          user_id?: string
+          valor_unitario?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventario_movimentacoes_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventario_movimentacoes_fornecedor_id_fkey"
+            columns: ["fornecedor_id"]
+            isOneToOne: false
+            referencedRelation: "fornecedores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventario_movimentacoes_inventario_id_fkey"
+            columns: ["inventario_id"]
+            isOneToOne: false
+            referencedRelation: "inventario"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       meios_pagamento: {
         Row: {
           ativo: boolean
           created_at: string
           created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           id: string
           nome: string
           updated_at: string
@@ -572,6 +835,8 @@ export type Database = {
           ativo?: boolean
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           id?: string
           nome: string
           updated_at?: string
@@ -582,6 +847,8 @@ export type Database = {
           ativo?: boolean
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           id?: string
           nome?: string
           updated_at?: string
@@ -598,6 +865,8 @@ export type Database = {
           created_at: string
           created_by: string | null
           data_compra: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           fornecedor_id: string | null
           id: string
           nome: string
@@ -618,6 +887,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           data_compra?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           fornecedor_id?: string | null
           id?: string
           nome: string
@@ -638,6 +909,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           data_compra?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           fornecedor_id?: string | null
           id?: string
           nome?: string
@@ -681,6 +954,8 @@ export type Database = {
           created_at: string
           created_by: string | null
           custo_medio: number | null
+          deleted_at: string | null
+          deleted_by: string | null
           descricao: string | null
           fornecedor: string | null
           id: string
@@ -697,6 +972,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           custo_medio?: number | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           descricao?: string | null
           fornecedor?: string | null
           id?: string
@@ -713,6 +990,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           custo_medio?: number | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           descricao?: string | null
           fornecedor?: string | null
           id?: string
@@ -760,6 +1039,8 @@ export type Database = {
           contato: string | null
           created_at: string
           created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           dias_trabalho: string | null
           funcao: string | null
           id: string
@@ -776,6 +1057,8 @@ export type Database = {
           contato?: string | null
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           dias_trabalho?: string | null
           funcao?: string | null
           id?: string
@@ -792,6 +1075,8 @@ export type Database = {
           contato?: string | null
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           dias_trabalho?: string | null
           funcao?: string | null
           id?: string
@@ -810,6 +1095,8 @@ export type Database = {
           created_at: string
           created_by: string | null
           custo_medio: number | null
+          deleted_at: string | null
+          deleted_by: string | null
           descricao: string | null
           id: string
           nome: string
@@ -824,6 +1111,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           custo_medio?: number | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           descricao?: string | null
           id?: string
           nome: string
@@ -838,6 +1127,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           custo_medio?: number | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           descricao?: string | null
           id?: string
           nome?: string
@@ -856,6 +1147,8 @@ export type Database = {
           created_at: string
           created_by: string | null
           data_transferencia: string
+          deleted_at: string | null
+          deleted_by: string | null
           id: string
           observacao: string | null
           updated_at: string
@@ -869,6 +1162,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           data_transferencia?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           id?: string
           observacao?: string | null
           updated_at?: string
@@ -882,6 +1177,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           data_transferencia?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           id?: string
           observacao?: string | null
           updated_at?: string
@@ -934,6 +1231,8 @@ export type Database = {
           created_by: string | null
           custo_total: number | null
           data_venda: string
+          deleted_at: string | null
+          deleted_by: string | null
           descricao: string | null
           forma_pagamento: string | null
           id: string
@@ -953,6 +1252,8 @@ export type Database = {
           created_by?: string | null
           custo_total?: number | null
           data_venda?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           descricao?: string | null
           forma_pagamento?: string | null
           id?: string
@@ -972,6 +1273,8 @@ export type Database = {
           created_by?: string | null
           custo_total?: number | null
           data_venda?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           descricao?: string | null
           forma_pagamento?: string | null
           id?: string
@@ -1010,6 +1313,8 @@ export type Database = {
           custo: number | null
           data_prevista_fim: string | null
           data_venda: string
+          deleted_at: string | null
+          deleted_by: string | null
           descricao: string | null
           id: string
           observacao: string | null
@@ -1029,6 +1334,8 @@ export type Database = {
           custo?: number | null
           data_prevista_fim?: string | null
           data_venda?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           descricao?: string | null
           id?: string
           observacao?: string | null
@@ -1048,6 +1355,8 @@ export type Database = {
           custo?: number | null
           data_prevista_fim?: string | null
           data_venda?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           descricao?: string | null
           id?: string
           observacao?: string | null
@@ -1111,6 +1420,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      purge_expired_deleted: { Args: never; Returns: number }
     }
     Enums: {
       app_role: "admin" | "financeiro" | "operador" | "leitura"
