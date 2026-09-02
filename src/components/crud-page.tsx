@@ -289,7 +289,7 @@ export function CrudPage({ title, description, table, fields, searchKey }: Props
                         <AlertDialogContent>
                           <AlertDialogHeader>
                             <AlertDialogTitle>Excluir este registro?</AlertDialogTitle>
-                            <AlertDialogDescription>Essa ação não pode ser desfeita.</AlertDialogDescription>
+                            <AlertDialogDescription>O registro vai para a lixeira e pode ser recuperado em Configurações → Auditoria e Recuperação por 7 dias.</AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancelar</AlertDialogCancel>
