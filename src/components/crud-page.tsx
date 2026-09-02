@@ -85,11 +85,12 @@ export function CrudPage({ title, description, table, fields, searchKey }: Props
   const { data: rows = [], isLoading } = useQuery({
     queryKey: [table],
     queryFn: async () => {
-      const { data, error } = await supabase.from(table as any).select("*").order("created_at", { ascending: false });
+      const { data, error } = await supabase.from(table as any).select("*").is("deleted_at", null).order("created_at", { ascending: false });
       if (error) throw error;
       return data as any[];
     },
   });
+
 
   const upsert = useMutation({
     mutationFn: async (payload: any) => {
