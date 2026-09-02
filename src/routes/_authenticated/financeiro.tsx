@@ -89,7 +89,7 @@ function ContasPagar({ focusId }: { focusId?: string }) {
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["contas_pagar_full"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("contas_pagar").select("*, bancos(nome), categorias(nome), meios_pagamento(nome)").order("data_vencimento", { ascending: false });
+      const { data, error } = await supabase.from("contas_pagar").select("*, bancos(nome), categorias(nome), meios_pagamento(nome)").is("deleted_at", null).order("data_vencimento", { ascending: false });
       if (error) throw error;
       return data as any[];
     },
@@ -115,8 +115,29 @@ function ContasPagar({ focusId }: { focusId?: string }) {
         banco_id: v.banco_id || null,
         observacao: v.observacao || null,
       };
+      const parcelas: Parcela[] | null = v.__parcelas ?? null;
       if (editing?.id) {
         const { error } = await supabase.from("contas_pagar").update(payload).eq("id", editing.id);
+        if (error) throw error;
+      } else if (parcelas && parcelas.length > 0) {
+        const parcelamento_id = crypto.randomUUID();
+        const total = parcelas.reduce((s, p) => s + p.valor, 0);
+        const novas = parcelas.map((p, i) => ({
+          ...payload,
+          user_id,
+          descricao: `${payload.descricao} (${p.label})`,
+          valor_previsto: p.valor,
+          data_vencimento: p.vencimento,
+          data_pagamento: null,
+          valor_pago: null,
+          status: "pendente",
+          parcelamento_id,
+          parcelamento_modo: v.__modo,
+          parcela_num: i + 1,
+          parcela_total: parcelas.length,
+          valor_total_parcelamento: total,
+        }));
+        const { error } = await supabase.from("contas_pagar").insert(novas as any);
         if (error) throw error;
       } else {
         const { error } = await supabase.from("contas_pagar").insert({ ...payload, user_id });
@@ -128,9 +149,11 @@ function ContasPagar({ focusId }: { focusId?: string }) {
   });
 
   const del = useMutation({
-    mutationFn: async (id: string) => { const { error } = await supabase.from("contas_pagar").delete().eq("id", id); if (error) throw error; },
-    onSuccess: () => { toast.success("Removido"); qc.invalidateQueries(); },
+    mutationFn: async (id: string) => { await softDelete("contas_pagar", id); },
+    onSuccess: () => { toast.success("Movido para a lixeira"); qc.invalidateQueries(); },
+    onError: (e: any) => toast.error(e.message ?? "Erro"),
   });
+
 
   const quitar = useMutation({
     mutationFn: async (row: any) => {
