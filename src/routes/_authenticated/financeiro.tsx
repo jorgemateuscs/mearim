@@ -291,11 +291,13 @@ function PagarForm({ editing, onSubmit, loading }: { editing: any | null; onSubm
     banco_id: editing?.banco_id ?? null,
     observacao: editing?.observacao ?? "",
   }));
+  const [parcelas, setParcelas] = useState<Parcela[] | null>(null);
+  const [modo, setModo] = useState<ModoParcelamento | "avista">("avista");
 
   return (
     <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
       <DialogHeader><DialogTitle>{editing ? "Editar conta" : "Nova conta a pagar"}</DialogTitle></DialogHeader>
-      <form onSubmit={(e) => { e.preventDefault(); onSubmit(v); }} className="grid grid-cols-2 gap-4 pt-2">
+      <form onSubmit={(e) => { e.preventDefault(); onSubmit({ ...v, __parcelas: parcelas, __modo: modo }); }} className="grid grid-cols-2 gap-4 pt-2">
         <div className="col-span-2"><Label>Descrição *</Label><Input required value={v.descricao} onChange={(e) => setV({ ...v, descricao: e.target.value })} /></div>
         <div><Label>Categoria</Label>
           <CategoriaSelect
@@ -311,8 +313,8 @@ function PagarForm({ editing, onSubmit, loading }: { editing: any | null; onSubm
             <SelectContent>{STATUS_PAGAR.map((s) => <SelectItem key={s} value={s}>{statusInfo(s).label}</SelectItem>)}</SelectContent>
           </Select>
         </div>
-        <div><Label>Vencimento *</Label><Input type="date" required value={v.data_vencimento} onChange={(e) => setV({ ...v, data_vencimento: e.target.value })} /></div>
-        <div><Label>Valor previsto *</Label><Input type="number" step="0.01" required value={v.valor_previsto} onChange={(e) => setV({ ...v, valor_previsto: e.target.value })} /></div>
+        <div><Label>{parcelas ? "1º vencimento" : "Vencimento *"}</Label><Input type="date" required value={v.data_vencimento} onChange={(e) => setV({ ...v, data_vencimento: e.target.value })} /></div>
+        <div><Label>{parcelas ? "Valor total *" : "Valor previsto *"}</Label><Input type="number" step="0.01" required value={v.valor_previsto} onChange={(e) => setV({ ...v, valor_previsto: e.target.value })} /></div>
         <div><Label>Data pagamento</Label><Input type="date" value={v.data_pagamento} onChange={(e) => setV({ ...v, data_pagamento: e.target.value })} /></div>
         <div><Label>Valor pago</Label><Input type="number" step="0.01" value={v.valor_pago} onChange={(e) => setV({ ...v, valor_pago: e.target.value })} /></div>
         <div><Label>Forma de pagamento</Label>
@@ -323,8 +325,16 @@ function PagarForm({ editing, onSubmit, loading }: { editing: any | null; onSubm
           />
         </div>
         <div><Label>Banco *</Label><EntitySelect table="bancos" value={v.banco_id} onChange={(id) => setV({ ...v, banco_id: id })} /></div>
+        {!editing && (
+          <ParcelamentoBuilder
+            valorTotal={Number(v.valor_previsto) || 0}
+            primeiraData={v.data_vencimento}
+            onChange={(p, m) => { setParcelas(p); setModo(m); }}
+          />
+        )}
         <div className="col-span-2"><Label>Observação</Label><Textarea rows={2} value={v.observacao} onChange={(e) => setV({ ...v, observacao: e.target.value })} /></div>
-        <DialogFooter className="col-span-2"><Button type="submit" disabled={loading}>{loading ? "Salvando..." : "Salvar"}</Button></DialogFooter>
+        <DialogFooter className="col-span-2"><Button type="submit" disabled={loading}>{loading ? "Salvando..." : parcelas ? `Salvar ${parcelas.length} parcelas` : "Salvar"}</Button></DialogFooter>
+
       </form>
     </DialogContent>
   );
