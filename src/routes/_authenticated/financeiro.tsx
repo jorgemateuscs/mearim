@@ -15,10 +15,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { EntitySelect } from "@/components/entity-select";
 import { CategoriaSelect, MeioPagamentoSelect } from "@/components/lookup-select";
+import { ParcelamentoBuilder, type Parcela, type ModoParcelamento } from "@/components/parcelamento";
 import { formatBRL, formatDate } from "@/lib/format";
 import { AuditInfo } from "@/components/audit-info";
+import { softDelete } from "@/lib/soft-delete";
 import { Plus, Pencil, Trash2, CheckCircle2, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
 import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/_authenticated/financeiro")({
   ssr: false,
@@ -86,7 +89,7 @@ function ContasPagar({ focusId }: { focusId?: string }) {
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["contas_pagar_full"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("contas_pagar").select("*, bancos(nome), categorias(nome), meios_pagamento(nome)").order("data_vencimento", { ascending: false });
+      const { data, error } = await supabase.from("contas_pagar").select("*, bancos(nome), categorias(nome), meios_pagamento(nome)").is("deleted_at", null).order("data_vencimento", { ascending: false });
       if (error) throw error;
       return data as any[];
     },
@@ -112,8 +115,29 @@ function ContasPagar({ focusId }: { focusId?: string }) {
         banco_id: v.banco_id || null,
         observacao: v.observacao || null,
       };
+      const parcelas: Parcela[] | null = v.__parcelas ?? null;
       if (editing?.id) {
         const { error } = await supabase.from("contas_pagar").update(payload).eq("id", editing.id);
+        if (error) throw error;
+      } else if (parcelas && parcelas.length > 0) {
+        const parcelamento_id = crypto.randomUUID();
+        const total = parcelas.reduce((s, p) => s + p.valor, 0);
+        const novas = parcelas.map((p, i) => ({
+          ...payload,
+          user_id,
+          descricao: `${payload.descricao} (${p.label})`,
+          valor_previsto: p.valor,
+          data_vencimento: p.vencimento,
+          data_pagamento: null,
+          valor_pago: null,
+          status: "pendente",
+          parcelamento_id,
+          parcelamento_modo: v.__modo,
+          parcela_num: i + 1,
+          parcela_total: parcelas.length,
+          valor_total_parcelamento: total,
+        }));
+        const { error } = await supabase.from("contas_pagar").insert(novas as any);
         if (error) throw error;
       } else {
         const { error } = await supabase.from("contas_pagar").insert({ ...payload, user_id });
@@ -125,9 +149,11 @@ function ContasPagar({ focusId }: { focusId?: string }) {
   });
 
   const del = useMutation({
-    mutationFn: async (id: string) => { const { error } = await supabase.from("contas_pagar").delete().eq("id", id); if (error) throw error; },
-    onSuccess: () => { toast.success("Removido"); qc.invalidateQueries(); },
+    mutationFn: async (id: string) => { await softDelete("contas_pagar", id); },
+    onSuccess: () => { toast.success("Movido para a lixeira"); qc.invalidateQueries(); },
+    onError: (e: any) => toast.error(e.message ?? "Erro"),
   });
+
 
   const quitar = useMutation({
     mutationFn: async (row: any) => {
@@ -265,11 +291,13 @@ function PagarForm({ editing, onSubmit, loading }: { editing: any | null; onSubm
     banco_id: editing?.banco_id ?? null,
     observacao: editing?.observacao ?? "",
   }));
+  const [parcelas, setParcelas] = useState<Parcela[] | null>(null);
+  const [modo, setModo] = useState<ModoParcelamento | "avista">("avista");
 
   return (
     <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
       <DialogHeader><DialogTitle>{editing ? "Editar conta" : "Nova conta a pagar"}</DialogTitle></DialogHeader>
-      <form onSubmit={(e) => { e.preventDefault(); onSubmit(v); }} className="grid grid-cols-2 gap-4 pt-2">
+      <form onSubmit={(e) => { e.preventDefault(); onSubmit({ ...v, __parcelas: parcelas, __modo: modo }); }} className="grid grid-cols-2 gap-4 pt-2">
         <div className="col-span-2"><Label>Descrição *</Label><Input required value={v.descricao} onChange={(e) => setV({ ...v, descricao: e.target.value })} /></div>
         <div><Label>Categoria</Label>
           <CategoriaSelect
@@ -285,8 +313,8 @@ function PagarForm({ editing, onSubmit, loading }: { editing: any | null; onSubm
             <SelectContent>{STATUS_PAGAR.map((s) => <SelectItem key={s} value={s}>{statusInfo(s).label}</SelectItem>)}</SelectContent>
           </Select>
         </div>
-        <div><Label>Vencimento *</Label><Input type="date" required value={v.data_vencimento} onChange={(e) => setV({ ...v, data_vencimento: e.target.value })} /></div>
-        <div><Label>Valor previsto *</Label><Input type="number" step="0.01" required value={v.valor_previsto} onChange={(e) => setV({ ...v, valor_previsto: e.target.value })} /></div>
+        <div><Label>{parcelas ? "1º vencimento" : "Vencimento *"}</Label><Input type="date" required value={v.data_vencimento} onChange={(e) => setV({ ...v, data_vencimento: e.target.value })} /></div>
+        <div><Label>{parcelas ? "Valor total *" : "Valor previsto *"}</Label><Input type="number" step="0.01" required value={v.valor_previsto} onChange={(e) => setV({ ...v, valor_previsto: e.target.value })} /></div>
         <div><Label>Data pagamento</Label><Input type="date" value={v.data_pagamento} onChange={(e) => setV({ ...v, data_pagamento: e.target.value })} /></div>
         <div><Label>Valor pago</Label><Input type="number" step="0.01" value={v.valor_pago} onChange={(e) => setV({ ...v, valor_pago: e.target.value })} /></div>
         <div><Label>Forma de pagamento</Label>
@@ -297,8 +325,16 @@ function PagarForm({ editing, onSubmit, loading }: { editing: any | null; onSubm
           />
         </div>
         <div><Label>Banco *</Label><EntitySelect table="bancos" value={v.banco_id} onChange={(id) => setV({ ...v, banco_id: id })} /></div>
+        {!editing && (
+          <ParcelamentoBuilder
+            valorTotal={Number(v.valor_previsto) || 0}
+            primeiraData={v.data_vencimento}
+            onChange={(p, m) => { setParcelas(p); setModo(m); }}
+          />
+        )}
         <div className="col-span-2"><Label>Observação</Label><Textarea rows={2} value={v.observacao} onChange={(e) => setV({ ...v, observacao: e.target.value })} /></div>
-        <DialogFooter className="col-span-2"><Button type="submit" disabled={loading}>{loading ? "Salvando..." : "Salvar"}</Button></DialogFooter>
+        <DialogFooter className="col-span-2"><Button type="submit" disabled={loading}>{loading ? "Salvando..." : parcelas ? `Salvar ${parcelas.length} parcelas` : "Salvar"}</Button></DialogFooter>
+
       </form>
     </DialogContent>
   );
@@ -316,7 +352,7 @@ function ContasReceber({ focusId }: { focusId?: string }) {
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["contas_receber_full"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("contas_receber").select("*, clientes(nome), bancos(nome), categorias(nome), meios_pagamento(nome)").order("data_vencimento", { ascending: false });
+      const { data, error } = await supabase.from("contas_receber").select("*, clientes(nome), bancos(nome), categorias(nome), meios_pagamento(nome)").is("deleted_at", null).order("data_vencimento", { ascending: false });
       if (error) throw error;
       return data as any[];
     },
@@ -346,8 +382,29 @@ function ContasReceber({ focusId }: { focusId?: string }) {
         banco_id: v.banco_id || null,
         observacao: v.observacao || null,
       };
+      const parcelas: Parcela[] | null = v.__parcelas ?? null;
       if (editing?.id) {
         const { error } = await supabase.from("contas_receber").update(payload).eq("id", editing.id);
+        if (error) throw error;
+      } else if (parcelas && parcelas.length > 0) {
+        const parcelamento_id = crypto.randomUUID();
+        const total = parcelas.reduce((s, p) => s + p.valor, 0);
+        const rows = parcelas.map((p, i) => ({
+          ...payload,
+          user_id,
+          parcela: p.label,
+          valor_parcela: p.valor,
+          data_vencimento: p.vencimento,
+          data_recebimento: null,
+          valor_recebido: null,
+          status: "pendente",
+          parcelamento_id,
+          parcelamento_modo: v.__modo,
+          parcela_num: i + 1,
+          parcela_total: parcelas.length,
+          valor_total_parcelamento: total,
+        }));
+        const { error } = await supabase.from("contas_receber").insert(rows as any);
         if (error) throw error;
       } else {
         const { error } = await supabase.from("contas_receber").insert({ ...payload, user_id });
@@ -359,9 +416,11 @@ function ContasReceber({ focusId }: { focusId?: string }) {
   });
 
   const del = useMutation({
-    mutationFn: async (id: string) => { const { error } = await supabase.from("contas_receber").delete().eq("id", id); if (error) throw error; },
-    onSuccess: () => { toast.success("Removido"); qc.invalidateQueries(); },
+    mutationFn: async (id: string) => { await softDelete("contas_receber", id); },
+    onSuccess: () => { toast.success("Movido para a lixeira"); qc.invalidateQueries(); },
+    onError: (e: any) => toast.error(e.message ?? "Erro"),
   });
+
 
   const receber = useMutation({
     mutationFn: async (row: any) => {
@@ -510,11 +569,13 @@ function ReceberForm({ editing, onSubmit, loading }: { editing: any | null; onSu
     banco_id: editing?.banco_id ?? null,
     observacao: editing?.observacao ?? "",
   }));
+  const [parcelas, setParcelas] = useState<Parcela[] | null>(null);
+  const [modo, setModo] = useState<ModoParcelamento | "avista">("avista");
 
   return (
     <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
       <DialogHeader><DialogTitle>{editing ? "Editar conta" : "Nova conta a receber"}</DialogTitle></DialogHeader>
-      <form onSubmit={(e) => { e.preventDefault(); onSubmit(v); }} className="grid grid-cols-2 gap-4 pt-2">
+      <form onSubmit={(e) => { e.preventDefault(); onSubmit({ ...v, __parcelas: parcelas, __modo: modo }); }} className="grid grid-cols-2 gap-4 pt-2">
         <div><Label>Cliente</Label><EntitySelect table="clientes" value={v.cliente_id} onChange={(id) => setV({ ...v, cliente_id: id })} /></div>
         <div><Label>Pagador (avulso)</Label><Input value={v.pagador_nome} onChange={(e) => setV({ ...v, pagador_nome: e.target.value })} /></div>
         <div><Label>Contato</Label><Input value={v.contato} onChange={(e) => setV({ ...v, contato: e.target.value })} /></div>
@@ -522,8 +583,8 @@ function ReceberForm({ editing, onSubmit, loading }: { editing: any | null; onSu
         <div className="col-span-2"><Label>Descrição *</Label><Input required value={v.descricao} onChange={(e) => setV({ ...v, descricao: e.target.value })} /></div>
         <div><Label>Data venda</Label><Input type="date" value={v.data_venda} onChange={(e) => setV({ ...v, data_venda: e.target.value })} /></div>
         <div><Label>Parcela (ex.: 1/3)</Label><Input value={v.parcela} onChange={(e) => setV({ ...v, parcela: e.target.value })} /></div>
-        <div><Label>Vencimento *</Label><Input type="date" required value={v.data_vencimento} onChange={(e) => setV({ ...v, data_vencimento: e.target.value })} /></div>
-        <div><Label>Valor da parcela *</Label><Input type="number" step="0.01" required value={v.valor_parcela} onChange={(e) => setV({ ...v, valor_parcela: e.target.value })} /></div>
+        <div><Label>{parcelas ? "1º vencimento" : "Vencimento *"}</Label><Input type="date" required value={v.data_vencimento} onChange={(e) => setV({ ...v, data_vencimento: e.target.value })} /></div>
+        <div><Label>{parcelas ? "Valor total *" : "Valor da parcela *"}</Label><Input type="number" step="0.01" required value={v.valor_parcela} onChange={(e) => setV({ ...v, valor_parcela: e.target.value })} /></div>
         <div><Label>Data recebimento</Label><Input type="date" value={v.data_recebimento} onChange={(e) => setV({ ...v, data_recebimento: e.target.value })} /></div>
         <div><Label>Valor recebido</Label><Input type="number" step="0.01" value={v.valor_recebido} onChange={(e) => setV({ ...v, valor_recebido: e.target.value })} /></div>
         <div><Label>Categoria</Label>
@@ -547,8 +608,15 @@ function ReceberForm({ editing, onSubmit, loading }: { editing: any | null; onSu
             <SelectContent>{STATUS_RECEBER.map((s) => <SelectItem key={s} value={s}>{statusInfo(s).label}</SelectItem>)}</SelectContent>
           </Select>
         </div>
+        {!editing && (
+          <ParcelamentoBuilder
+            valorTotal={Number(v.valor_parcela) || 0}
+            primeiraData={v.data_vencimento}
+            onChange={(p, m) => { setParcelas(p); setModo(m); }}
+          />
+        )}
         <div className="col-span-2"><Label>Observação</Label><Textarea rows={2} value={v.observacao} onChange={(e) => setV({ ...v, observacao: e.target.value })} /></div>
-        <DialogFooter className="col-span-2"><Button type="submit" disabled={loading}>{loading ? "Salvando..." : "Salvar"}</Button></DialogFooter>
+        <DialogFooter className="col-span-2"><Button type="submit" disabled={loading}>{loading ? "Salvando..." : parcelas ? `Salvar ${parcelas.length} parcelas` : "Salvar"}</Button></DialogFooter>
       </form>
     </DialogContent>
   );
@@ -572,3 +640,4 @@ function Info({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+

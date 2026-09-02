@@ -20,6 +20,8 @@ import { AuditInfo } from "@/components/audit-info";
 import { formatBRL, formatDateTime } from "@/lib/format";
 import { useUserEmails, userLabel } from "@/hooks/use-user-emails";
 import { exportCsv, exportPdf } from "@/components/data-export";
+import { softDelete } from "@/lib/soft-delete";
+
 
 export type Field = {
   key: string;
@@ -85,11 +87,12 @@ export function CrudPage({ title, description, table, fields, searchKey }: Props
   const { data: rows = [], isLoading } = useQuery({
     queryKey: [table],
     queryFn: async () => {
-      const { data, error } = await supabase.from(table as any).select("*").order("created_at", { ascending: false });
+      const { data, error } = await supabase.from(table as any).select("*").is("deleted_at", null).order("created_at", { ascending: false });
       if (error) throw error;
       return data as any[];
     },
   });
+
 
   const upsert = useMutation({
     mutationFn: async (payload: any) => {
@@ -121,16 +124,14 @@ export function CrudPage({ title, description, table, fields, searchKey }: Props
   });
 
   const del = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from(table as any).delete().eq("id", id);
-      if (error) throw error;
-    },
+    mutationFn: async (id: string) => { await softDelete(table, id); },
     onSuccess: () => {
-      toast.success("Removido");
+      toast.success("Movido para a lixeira (recuperável por 7 dias)");
       qc.invalidateQueries();
     },
     onError: (e: any) => toast.error(e.message ?? "Erro ao excluir"),
   });
+
 
   const cellText = (f: Field, row: any): string => {
     const v = row[f.key];
@@ -288,7 +289,7 @@ export function CrudPage({ title, description, table, fields, searchKey }: Props
                         <AlertDialogContent>
                           <AlertDialogHeader>
                             <AlertDialogTitle>Excluir este registro?</AlertDialogTitle>
-                            <AlertDialogDescription>Essa ação não pode ser desfeita.</AlertDialogDescription>
+                            <AlertDialogDescription>O registro vai para a lixeira e pode ser recuperado em Configurações → Auditoria e Recuperação por 7 dias.</AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancelar</AlertDialogCancel>
