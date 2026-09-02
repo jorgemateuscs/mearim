@@ -122,16 +122,14 @@ export function CrudPage({ title, description, table, fields, searchKey }: Props
   });
 
   const del = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from(table as any).delete().eq("id", id);
-      if (error) throw error;
-    },
+    mutationFn: async (id: string) => { await softDelete(table, id); },
     onSuccess: () => {
-      toast.success("Removido");
+      toast.success("Movido para a lixeira (recuperável por 7 dias)");
       qc.invalidateQueries();
     },
     onError: (e: any) => toast.error(e.message ?? "Erro ao excluir"),
   });
+
 
   const cellText = (f: Field, row: any): string => {
     const v = row[f.key];
