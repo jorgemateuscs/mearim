@@ -20,6 +20,8 @@ import { AuditInfo } from "@/components/audit-info";
 import { formatBRL, formatDateTime } from "@/lib/format";
 import { useUserEmails, userLabel } from "@/hooks/use-user-emails";
 import { exportCsv, exportPdf } from "@/components/data-export";
+import { softDelete } from "@/lib/soft-delete";
+
 
 export type Field = {
   key: string;
