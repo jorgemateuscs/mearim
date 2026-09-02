@@ -15,10 +15,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { EntitySelect } from "@/components/entity-select";
 import { CategoriaSelect, MeioPagamentoSelect } from "@/components/lookup-select";
+import { ParcelamentoBuilder, type Parcela, type ModoParcelamento } from "@/components/parcelamento";
 import { formatBRL, formatDate } from "@/lib/format";
 import { AuditInfo } from "@/components/audit-info";
+import { softDelete } from "@/lib/soft-delete";
 import { Plus, Pencil, Trash2, CheckCircle2, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
 import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/_authenticated/financeiro")({
   ssr: false,
