@@ -513,11 +513,13 @@ function ReceberForm({ editing, onSubmit, loading }: { editing: any | null; onSu
     banco_id: editing?.banco_id ?? null,
     observacao: editing?.observacao ?? "",
   }));
+  const [parcelas, setParcelas] = useState<Parcela[] | null>(null);
+  const [modo, setModo] = useState<ModoParcelamento | "avista">("avista");
 
   return (
     <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
       <DialogHeader><DialogTitle>{editing ? "Editar conta" : "Nova conta a receber"}</DialogTitle></DialogHeader>
-      <form onSubmit={(e) => { e.preventDefault(); onSubmit(v); }} className="grid grid-cols-2 gap-4 pt-2">
+      <form onSubmit={(e) => { e.preventDefault(); onSubmit({ ...v, __parcelas: parcelas, __modo: modo }); }} className="grid grid-cols-2 gap-4 pt-2">
         <div><Label>Cliente</Label><EntitySelect table="clientes" value={v.cliente_id} onChange={(id) => setV({ ...v, cliente_id: id })} /></div>
         <div><Label>Pagador (avulso)</Label><Input value={v.pagador_nome} onChange={(e) => setV({ ...v, pagador_nome: e.target.value })} /></div>
         <div><Label>Contato</Label><Input value={v.contato} onChange={(e) => setV({ ...v, contato: e.target.value })} /></div>
@@ -525,8 +527,8 @@ function ReceberForm({ editing, onSubmit, loading }: { editing: any | null; onSu
         <div className="col-span-2"><Label>Descrição *</Label><Input required value={v.descricao} onChange={(e) => setV({ ...v, descricao: e.target.value })} /></div>
         <div><Label>Data venda</Label><Input type="date" value={v.data_venda} onChange={(e) => setV({ ...v, data_venda: e.target.value })} /></div>
         <div><Label>Parcela (ex.: 1/3)</Label><Input value={v.parcela} onChange={(e) => setV({ ...v, parcela: e.target.value })} /></div>
-        <div><Label>Vencimento *</Label><Input type="date" required value={v.data_vencimento} onChange={(e) => setV({ ...v, data_vencimento: e.target.value })} /></div>
-        <div><Label>Valor da parcela *</Label><Input type="number" step="0.01" required value={v.valor_parcela} onChange={(e) => setV({ ...v, valor_parcela: e.target.value })} /></div>
+        <div><Label>{parcelas ? "1º vencimento" : "Vencimento *"}</Label><Input type="date" required value={v.data_vencimento} onChange={(e) => setV({ ...v, data_vencimento: e.target.value })} /></div>
+        <div><Label>{parcelas ? "Valor total *" : "Valor da parcela *"}</Label><Input type="number" step="0.01" required value={v.valor_parcela} onChange={(e) => setV({ ...v, valor_parcela: e.target.value })} /></div>
         <div><Label>Data recebimento</Label><Input type="date" value={v.data_recebimento} onChange={(e) => setV({ ...v, data_recebimento: e.target.value })} /></div>
         <div><Label>Valor recebido</Label><Input type="number" step="0.01" value={v.valor_recebido} onChange={(e) => setV({ ...v, valor_recebido: e.target.value })} /></div>
         <div><Label>Categoria</Label>
@@ -550,8 +552,15 @@ function ReceberForm({ editing, onSubmit, loading }: { editing: any | null; onSu
             <SelectContent>{STATUS_RECEBER.map((s) => <SelectItem key={s} value={s}>{statusInfo(s).label}</SelectItem>)}</SelectContent>
           </Select>
         </div>
+        {!editing && (
+          <ParcelamentoBuilder
+            valorTotal={Number(v.valor_parcela) || 0}
+            primeiraData={v.data_vencimento}
+            onChange={(p, m) => { setParcelas(p); setModo(m); }}
+          />
+        )}
         <div className="col-span-2"><Label>Observação</Label><Textarea rows={2} value={v.observacao} onChange={(e) => setV({ ...v, observacao: e.target.value })} /></div>
-        <DialogFooter className="col-span-2"><Button type="submit" disabled={loading}>{loading ? "Salvando..." : "Salvar"}</Button></DialogFooter>
+        <DialogFooter className="col-span-2"><Button type="submit" disabled={loading}>{loading ? "Salvando..." : parcelas ? `Salvar ${parcelas.length} parcelas` : "Salvar"}</Button></DialogFooter>
       </form>
     </DialogContent>
   );
@@ -575,3 +584,4 @@ function Info({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
