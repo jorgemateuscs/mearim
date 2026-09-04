@@ -16,14 +16,12 @@ import { Route as AuthenticatedVendasRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedServicosRouteImport } from './routes/_authenticated/servicos'
 import { Route as AuthenticatedRelatoriosRouteImport } from './routes/_authenticated/relatorios'
 import { Route as AuthenticatedProfissionaisRouteImport } from './routes/_authenticated/profissionais'
-import { Route as AuthenticatedPecasRouteImport } from './routes/_authenticated/pecas'
 import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
 import { Route as AuthenticatedMeiosPagamentoRouteImport } from './routes/_authenticated/meios-pagamento'
 import { Route as AuthenticatedInventarioRouteImport } from './routes/_authenticated/inventario'
 import { Route as AuthenticatedFornecedoresRouteImport } from './routes/_authenticated/fornecedores'
 import { Route as AuthenticatedFinanceiroRouteImport } from './routes/_authenticated/financeiro'
 import { Route as AuthenticatedEstoqueRouteImport } from './routes/_authenticated/estoque'
-import { Route as AuthenticatedEquipamentosRouteImport } from './routes/_authenticated/equipamentos'
 import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authenticated/configuracoes'
 import { Route as AuthenticatedConciliacaoRouteImport } from './routes/_authenticated/conciliacao'
 import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticated/clientes'
@@ -65,11 +63,6 @@ const AuthenticatedProfissionaisRoute =
     path: '/profissionais',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPecasRoute = AuthenticatedPecasRouteImport.update({
-  id: '/pecas',
-  path: '/pecas',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedPainelRoute = AuthenticatedPainelRouteImport.update({
   id: '/painel',
   path: '/painel',
@@ -102,12 +95,6 @@ const AuthenticatedEstoqueRoute = AuthenticatedEstoqueRouteImport.update({
   path: '/estoque',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedEquipamentosRoute =
-  AuthenticatedEquipamentosRouteImport.update({
-    id: '/equipamentos',
-    path: '/equipamentos',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedConfiguracoesRoute =
   AuthenticatedConfiguracoesRouteImport.update({
     id: '/configuracoes',
@@ -144,14 +131,12 @@ export interface FileRoutesByFullPath {
   '/clientes': typeof AuthenticatedClientesRoute
   '/conciliacao': typeof AuthenticatedConciliacaoRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
-  '/equipamentos': typeof AuthenticatedEquipamentosRoute
   '/estoque': typeof AuthenticatedEstoqueRoute
   '/financeiro': typeof AuthenticatedFinanceiroRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/inventario': typeof AuthenticatedInventarioRoute
   '/meios-pagamento': typeof AuthenticatedMeiosPagamentoRoute
   '/painel': typeof AuthenticatedPainelRoute
-  '/pecas': typeof AuthenticatedPecasRoute
   '/profissionais': typeof AuthenticatedProfissionaisRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/servicos': typeof AuthenticatedServicosRoute
@@ -165,14 +150,12 @@ export interface FileRoutesByTo {
   '/clientes': typeof AuthenticatedClientesRoute
   '/conciliacao': typeof AuthenticatedConciliacaoRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
-  '/equipamentos': typeof AuthenticatedEquipamentosRoute
   '/estoque': typeof AuthenticatedEstoqueRoute
   '/financeiro': typeof AuthenticatedFinanceiroRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/inventario': typeof AuthenticatedInventarioRoute
   '/meios-pagamento': typeof AuthenticatedMeiosPagamentoRoute
   '/painel': typeof AuthenticatedPainelRoute
-  '/pecas': typeof AuthenticatedPecasRoute
   '/profissionais': typeof AuthenticatedProfissionaisRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/servicos': typeof AuthenticatedServicosRoute
@@ -188,14 +171,12 @@ export interface FileRoutesById {
   '/_authenticated/clientes': typeof AuthenticatedClientesRoute
   '/_authenticated/conciliacao': typeof AuthenticatedConciliacaoRoute
   '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
-  '/_authenticated/equipamentos': typeof AuthenticatedEquipamentosRoute
   '/_authenticated/estoque': typeof AuthenticatedEstoqueRoute
   '/_authenticated/financeiro': typeof AuthenticatedFinanceiroRoute
   '/_authenticated/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/_authenticated/inventario': typeof AuthenticatedInventarioRoute
   '/_authenticated/meios-pagamento': typeof AuthenticatedMeiosPagamentoRoute
   '/_authenticated/painel': typeof AuthenticatedPainelRoute
-  '/_authenticated/pecas': typeof AuthenticatedPecasRoute
   '/_authenticated/profissionais': typeof AuthenticatedProfissionaisRoute
   '/_authenticated/relatorios': typeof AuthenticatedRelatoriosRoute
   '/_authenticated/servicos': typeof AuthenticatedServicosRoute
@@ -211,14 +192,12 @@ export interface FileRouteTypes {
     | '/clientes'
     | '/conciliacao'
     | '/configuracoes'
-    | '/equipamentos'
     | '/estoque'
     | '/financeiro'
     | '/fornecedores'
     | '/inventario'
     | '/meios-pagamento'
     | '/painel'
-    | '/pecas'
     | '/profissionais'
     | '/relatorios'
     | '/servicos'
@@ -232,14 +211,12 @@ export interface FileRouteTypes {
     | '/clientes'
     | '/conciliacao'
     | '/configuracoes'
-    | '/equipamentos'
     | '/estoque'
     | '/financeiro'
     | '/fornecedores'
     | '/inventario'
     | '/meios-pagamento'
     | '/painel'
-    | '/pecas'
     | '/profissionais'
     | '/relatorios'
     | '/servicos'
@@ -254,14 +231,12 @@ export interface FileRouteTypes {
     | '/_authenticated/clientes'
     | '/_authenticated/conciliacao'
     | '/_authenticated/configuracoes'
-    | '/_authenticated/equipamentos'
     | '/_authenticated/estoque'
     | '/_authenticated/financeiro'
     | '/_authenticated/fornecedores'
     | '/_authenticated/inventario'
     | '/_authenticated/meios-pagamento'
     | '/_authenticated/painel'
-    | '/_authenticated/pecas'
     | '/_authenticated/profissionais'
     | '/_authenticated/relatorios'
     | '/_authenticated/servicos'
@@ -325,13 +300,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfissionaisRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pecas': {
-      id: '/_authenticated/pecas'
-      path: '/pecas'
-      fullPath: '/pecas'
-      preLoaderRoute: typeof AuthenticatedPecasRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/painel': {
       id: '/_authenticated/painel'
       path: '/painel'
@@ -372,13 +340,6 @@ declare module '@tanstack/react-router' {
       path: '/estoque'
       fullPath: '/estoque'
       preLoaderRoute: typeof AuthenticatedEstoqueRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/equipamentos': {
-      id: '/_authenticated/equipamentos'
-      path: '/equipamentos'
-      fullPath: '/equipamentos'
-      preLoaderRoute: typeof AuthenticatedEquipamentosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/configuracoes': {
@@ -425,14 +386,12 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedClientesRoute: typeof AuthenticatedClientesRoute
   AuthenticatedConciliacaoRoute: typeof AuthenticatedConciliacaoRoute
   AuthenticatedConfiguracoesRoute: typeof AuthenticatedConfiguracoesRoute
-  AuthenticatedEquipamentosRoute: typeof AuthenticatedEquipamentosRoute
   AuthenticatedEstoqueRoute: typeof AuthenticatedEstoqueRoute
   AuthenticatedFinanceiroRoute: typeof AuthenticatedFinanceiroRoute
   AuthenticatedFornecedoresRoute: typeof AuthenticatedFornecedoresRoute
   AuthenticatedInventarioRoute: typeof AuthenticatedInventarioRoute
   AuthenticatedMeiosPagamentoRoute: typeof AuthenticatedMeiosPagamentoRoute
   AuthenticatedPainelRoute: typeof AuthenticatedPainelRoute
-  AuthenticatedPecasRoute: typeof AuthenticatedPecasRoute
   AuthenticatedProfissionaisRoute: typeof AuthenticatedProfissionaisRoute
   AuthenticatedRelatoriosRoute: typeof AuthenticatedRelatoriosRoute
   AuthenticatedServicosRoute: typeof AuthenticatedServicosRoute
@@ -445,14 +404,12 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedClientesRoute: AuthenticatedClientesRoute,
   AuthenticatedConciliacaoRoute: AuthenticatedConciliacaoRoute,
   AuthenticatedConfiguracoesRoute: AuthenticatedConfiguracoesRoute,
-  AuthenticatedEquipamentosRoute: AuthenticatedEquipamentosRoute,
   AuthenticatedEstoqueRoute: AuthenticatedEstoqueRoute,
   AuthenticatedFinanceiroRoute: AuthenticatedFinanceiroRoute,
   AuthenticatedFornecedoresRoute: AuthenticatedFornecedoresRoute,
   AuthenticatedInventarioRoute: AuthenticatedInventarioRoute,
   AuthenticatedMeiosPagamentoRoute: AuthenticatedMeiosPagamentoRoute,
   AuthenticatedPainelRoute: AuthenticatedPainelRoute,
-  AuthenticatedPecasRoute: AuthenticatedPecasRoute,
   AuthenticatedProfissionaisRoute: AuthenticatedProfissionaisRoute,
   AuthenticatedRelatoriosRoute: AuthenticatedRelatoriosRoute,
   AuthenticatedServicosRoute: AuthenticatedServicosRoute,
