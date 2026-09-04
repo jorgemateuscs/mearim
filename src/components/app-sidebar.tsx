@@ -13,10 +13,11 @@ import {
   Tags,
   Truck,
   CreditCard,
-  Cpu,
-  Cog,
+  FileText,
+  History,
   Settings,
 } from "lucide-react";
+
 import { useQueryClient } from "@tanstack/react-query";
 import {
   Sidebar,
@@ -65,17 +66,18 @@ const groups: { label: string; items: { title: string; url: string; icon: any }[
   },
   {
     label: "Patrimônio",
-    items: [
-      { title: "Inventário", url: "/inventario", icon: Boxes },
-      { title: "Equipamentos", url: "/equipamentos", icon: Cpu },
-      { title: "Peças", url: "/pecas", icon: Cog },
-    ],
+    items: [{ title: "Inventário", url: "/inventario", icon: Boxes }],
   },
   {
     label: "Sistema",
-    items: [{ title: "Configurações", url: "/configuracoes", icon: Settings }],
+    items: [
+      { title: "Relatórios", url: "/relatorios", icon: FileText },
+      { title: "Auditoria e Lixeira", url: "/auditoria", icon: History },
+      { title: "Configurações", url: "/configuracoes", icon: Settings },
+    ],
   },
 ];
+
 
 export function AppSidebar() {
   const { state } = useSidebar();
