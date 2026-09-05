@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Card } from "@/components/ui/card";
-import { Tags, Truck, CreditCard, Landmark, Users, Wrench } from "lucide-react";
+import { Tags, Truck, CreditCard, Landmark, Users, Wrench, FileText, History } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/configuracoes")({
   ssr: false,
@@ -14,7 +14,10 @@ const groups = [
   { title: "Bancos e conciliação", desc: "Contas bancárias, saldos e extrato oficial.", url: "/conciliacao", icon: Landmark },
   { title: "Profissionais", desc: "Equipe, comissões e benefícios.", url: "/profissionais", icon: Users },
   { title: "Serviços", desc: "Catálogo de serviços e comissões.", url: "/servicos", icon: Wrench },
+  { title: "Relatórios", desc: "Relatório financeiro profissional em PDF por período.", url: "/relatorios", icon: FileText },
+  { title: "Auditoria e Lixeira", desc: "Quem alterou o quê, quando — e recuperação de 7 dias.", url: "/auditoria", icon: History },
 ];
+
 
 function ConfiguracoesPage() {
   return (
