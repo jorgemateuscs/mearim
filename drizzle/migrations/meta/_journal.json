@@ -8,6 +8,13 @@
       "when": 1788299547960,
       "tag": "0000_patrimonio_auditoria_lixeira_parcelamento",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788569651122,
+      "tag": "0001_create_contas_correntes",
+      "breakpoints": true
     }
   ]
 }

@@ -203,6 +203,276 @@ export type Database = {
         }
         Relationships: []
       }
+      contas_correntes: {
+        Row: {
+          cliente_id: string | null
+          created_at: string
+          created_by: string | null
+          fornecedor_id: string | null
+          id: string
+          observacao: string | null
+          parceiro_tipo: Database["public"]["Enums"]["cc_parceiro"]
+          saldo_credito: number
+          saldo_devedor: number
+          status: string
+          updated_at: string
+          updated_by: string | null
+          user_id: string
+        }
+        Insert: {
+          cliente_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          fornecedor_id?: string | null
+          id?: string
+          observacao?: string | null
+          parceiro_tipo: Database["public"]["Enums"]["cc_parceiro"]
+          saldo_credito?: number
+          saldo_devedor?: number
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+          user_id: string
+        }
+        Update: {
+          cliente_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          fornecedor_id?: string | null
+          id?: string
+          observacao?: string | null
+          parceiro_tipo?: Database["public"]["Enums"]["cc_parceiro"]
+          saldo_credito?: number
+          saldo_devedor?: number
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contas_correntes_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contas_correntes_fornecedor_id_fkey"
+            columns: ["fornecedor_id"]
+            isOneToOne: false
+            referencedRelation: "fornecedores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contas_correntes_itens: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          desconto: number
+          descricao: string
+          id: string
+          lancamento_id: string
+          produto_id: string | null
+          quantidade: number
+          servico_id: string | null
+          updated_at: string
+          updated_by: string | null
+          user_id: string
+          valor_total: number
+          valor_unitario: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          desconto?: number
+          descricao: string
+          id?: string
+          lancamento_id: string
+          produto_id?: string | null
+          quantidade?: number
+          servico_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          user_id: string
+          valor_total?: number
+          valor_unitario?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          desconto?: number
+          descricao?: string
+          id?: string
+          lancamento_id?: string
+          produto_id?: string | null
+          quantidade?: number
+          servico_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          user_id?: string
+          valor_total?: number
+          valor_unitario?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contas_correntes_itens_lancamento_id_fkey"
+            columns: ["lancamento_id"]
+            isOneToOne: false
+            referencedRelation: "contas_correntes_lancamentos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contas_correntes_itens_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contas_correntes_itens_servico_id_fkey"
+            columns: ["servico_id"]
+            isOneToOne: false
+            referencedRelation: "servicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contas_correntes_lancamentos: {
+        Row: {
+          banco_id: string | null
+          categoria_id: string | null
+          cliente_id: string | null
+          conta_financeira_id: string | null
+          conta_id: string
+          created_at: string
+          created_by: string | null
+          data_lancamento: string
+          data_vencimento: string | null
+          desconto: number
+          descricao: string
+          forma_pagamento: string | null
+          fornecedor_id: string | null
+          id: string
+          lancamento_origem_id: string | null
+          meio_pagamento_id: string | null
+          observacao: string | null
+          parceiro_tipo: Database["public"]["Enums"]["cc_parceiro"]
+          saldo_apos: number
+          tipo: Database["public"]["Enums"]["cc_lanc_tipo"]
+          updated_at: string
+          updated_by: string | null
+          user_id: string
+          valor_credito: number
+          valor_debito: number
+        }
+        Insert: {
+          banco_id?: string | null
+          categoria_id?: string | null
+          cliente_id?: string | null
+          conta_financeira_id?: string | null
+          conta_id: string
+          created_at?: string
+          created_by?: string | null
+          data_lancamento?: string
+          data_vencimento?: string | null
+          desconto?: number
+          descricao: string
+          forma_pagamento?: string | null
+          fornecedor_id?: string | null
+          id?: string
+          lancamento_origem_id?: string | null
+          meio_pagamento_id?: string | null
+          observacao?: string | null
+          parceiro_tipo: Database["public"]["Enums"]["cc_parceiro"]
+          saldo_apos?: number
+          tipo: Database["public"]["Enums"]["cc_lanc_tipo"]
+          updated_at?: string
+          updated_by?: string | null
+          user_id: string
+          valor_credito?: number
+          valor_debito?: number
+        }
+        Update: {
+          banco_id?: string | null
+          categoria_id?: string | null
+          cliente_id?: string | null
+          conta_financeira_id?: string | null
+          conta_id?: string
+          created_at?: string
+          created_by?: string | null
+          data_lancamento?: string
+          data_vencimento?: string | null
+          desconto?: number
+          descricao?: string
+          forma_pagamento?: string | null
+          fornecedor_id?: string | null
+          id?: string
+          lancamento_origem_id?: string | null
+          meio_pagamento_id?: string | null
+          observacao?: string | null
+          parceiro_tipo?: Database["public"]["Enums"]["cc_parceiro"]
+          saldo_apos?: number
+          tipo?: Database["public"]["Enums"]["cc_lanc_tipo"]
+          updated_at?: string
+          updated_by?: string | null
+          user_id?: string
+          valor_credito?: number
+          valor_debito?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contas_correntes_lancamentos_banco_id_fkey"
+            columns: ["banco_id"]
+            isOneToOne: false
+            referencedRelation: "bancos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contas_correntes_lancamentos_categoria_id_fkey"
+            columns: ["categoria_id"]
+            isOneToOne: false
+            referencedRelation: "categorias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contas_correntes_lancamentos_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contas_correntes_lancamentos_conta_id_fkey"
+            columns: ["conta_id"]
+            isOneToOne: false
+            referencedRelation: "contas_correntes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contas_correntes_lancamentos_fornecedor_id_fkey"
+            columns: ["fornecedor_id"]
+            isOneToOne: false
+            referencedRelation: "fornecedores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contas_correntes_lancamentos_lancamento_origem_id_fkey"
+            columns: ["lancamento_origem_id"]
+            isOneToOne: false
+            referencedRelation: "contas_correntes_lancamentos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contas_correntes_lancamentos_meio_pagamento_id_fkey"
+            columns: ["meio_pagamento_id"]
+            isOneToOne: false
+            referencedRelation: "meios_pagamento"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contas_pagar: {
         Row: {
           banco_id: string | null
@@ -1413,6 +1683,7 @@ export type Database = {
       }
     }
     Functions: {
+      cc_recalcular: { Args: { _conta: string }; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1430,6 +1701,14 @@ export type Database = {
         | "patrimonio"
         | "servico"
         | "estoque"
+      cc_lanc_tipo:
+        | "venda"
+        | "compra"
+        | "pagamento"
+        | "credito"
+        | "uso_credito"
+        | "ajuste"
+      cc_parceiro: "cliente" | "fornecedor"
       movimentacao_origem:
         | "conta_pagar"
         | "conta_receber"
@@ -1575,6 +1854,15 @@ export const Constants = {
         "servico",
         "estoque",
       ],
+      cc_lanc_tipo: [
+        "venda",
+        "compra",
+        "pagamento",
+        "credito",
+        "uso_credito",
+        "ajuste",
+      ],
+      cc_parceiro: ["cliente", "fornecedor"],
       movimentacao_origem: [
         "conta_pagar",
         "conta_receber",
