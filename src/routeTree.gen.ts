@@ -22,6 +22,8 @@ import { Route as AuthenticatedInventarioRouteImport } from './routes/_authentic
 import { Route as AuthenticatedFornecedoresRouteImport } from './routes/_authenticated/fornecedores'
 import { Route as AuthenticatedFinanceiroRouteImport } from './routes/_authenticated/financeiro'
 import { Route as AuthenticatedEstoqueRouteImport } from './routes/_authenticated/estoque'
+import { Route as AuthenticatedContasFornecedoresRouteImport } from './routes/_authenticated/contas-fornecedores'
+import { Route as AuthenticatedContasClientesRouteImport } from './routes/_authenticated/contas-clientes'
 import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authenticated/configuracoes'
 import { Route as AuthenticatedConciliacaoRouteImport } from './routes/_authenticated/conciliacao'
 import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticated/clientes'
@@ -95,6 +97,18 @@ const AuthenticatedEstoqueRoute = AuthenticatedEstoqueRouteImport.update({
   path: '/estoque',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedContasFornecedoresRoute =
+  AuthenticatedContasFornecedoresRouteImport.update({
+    id: '/contas-fornecedores',
+    path: '/contas-fornecedores',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedContasClientesRoute =
+  AuthenticatedContasClientesRouteImport.update({
+    id: '/contas-clientes',
+    path: '/contas-clientes',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedConfiguracoesRoute =
   AuthenticatedConfiguracoesRouteImport.update({
     id: '/configuracoes',
@@ -131,6 +145,8 @@ export interface FileRoutesByFullPath {
   '/clientes': typeof AuthenticatedClientesRoute
   '/conciliacao': typeof AuthenticatedConciliacaoRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
+  '/contas-clientes': typeof AuthenticatedContasClientesRoute
+  '/contas-fornecedores': typeof AuthenticatedContasFornecedoresRoute
   '/estoque': typeof AuthenticatedEstoqueRoute
   '/financeiro': typeof AuthenticatedFinanceiroRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
@@ -150,6 +166,8 @@ export interface FileRoutesByTo {
   '/clientes': typeof AuthenticatedClientesRoute
   '/conciliacao': typeof AuthenticatedConciliacaoRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
+  '/contas-clientes': typeof AuthenticatedContasClientesRoute
+  '/contas-fornecedores': typeof AuthenticatedContasFornecedoresRoute
   '/estoque': typeof AuthenticatedEstoqueRoute
   '/financeiro': typeof AuthenticatedFinanceiroRoute
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
@@ -171,6 +189,8 @@ export interface FileRoutesById {
   '/_authenticated/clientes': typeof AuthenticatedClientesRoute
   '/_authenticated/conciliacao': typeof AuthenticatedConciliacaoRoute
   '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
+  '/_authenticated/contas-clientes': typeof AuthenticatedContasClientesRoute
+  '/_authenticated/contas-fornecedores': typeof AuthenticatedContasFornecedoresRoute
   '/_authenticated/estoque': typeof AuthenticatedEstoqueRoute
   '/_authenticated/financeiro': typeof AuthenticatedFinanceiroRoute
   '/_authenticated/fornecedores': typeof AuthenticatedFornecedoresRoute
@@ -192,6 +212,8 @@ export interface FileRouteTypes {
     | '/clientes'
     | '/conciliacao'
     | '/configuracoes'
+    | '/contas-clientes'
+    | '/contas-fornecedores'
     | '/estoque'
     | '/financeiro'
     | '/fornecedores'
@@ -211,6 +233,8 @@ export interface FileRouteTypes {
     | '/clientes'
     | '/conciliacao'
     | '/configuracoes'
+    | '/contas-clientes'
+    | '/contas-fornecedores'
     | '/estoque'
     | '/financeiro'
     | '/fornecedores'
@@ -231,6 +255,8 @@ export interface FileRouteTypes {
     | '/_authenticated/clientes'
     | '/_authenticated/conciliacao'
     | '/_authenticated/configuracoes'
+    | '/_authenticated/contas-clientes'
+    | '/_authenticated/contas-fornecedores'
     | '/_authenticated/estoque'
     | '/_authenticated/financeiro'
     | '/_authenticated/fornecedores'
@@ -342,6 +368,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEstoqueRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/contas-fornecedores': {
+      id: '/_authenticated/contas-fornecedores'
+      path: '/contas-fornecedores'
+      fullPath: '/contas-fornecedores'
+      preLoaderRoute: typeof AuthenticatedContasFornecedoresRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/contas-clientes': {
+      id: '/_authenticated/contas-clientes'
+      path: '/contas-clientes'
+      fullPath: '/contas-clientes'
+      preLoaderRoute: typeof AuthenticatedContasClientesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/configuracoes': {
       id: '/_authenticated/configuracoes'
       path: '/configuracoes'
@@ -386,6 +426,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedClientesRoute: typeof AuthenticatedClientesRoute
   AuthenticatedConciliacaoRoute: typeof AuthenticatedConciliacaoRoute
   AuthenticatedConfiguracoesRoute: typeof AuthenticatedConfiguracoesRoute
+  AuthenticatedContasClientesRoute: typeof AuthenticatedContasClientesRoute
+  AuthenticatedContasFornecedoresRoute: typeof AuthenticatedContasFornecedoresRoute
   AuthenticatedEstoqueRoute: typeof AuthenticatedEstoqueRoute
   AuthenticatedFinanceiroRoute: typeof AuthenticatedFinanceiroRoute
   AuthenticatedFornecedoresRoute: typeof AuthenticatedFornecedoresRoute
@@ -404,6 +446,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedClientesRoute: AuthenticatedClientesRoute,
   AuthenticatedConciliacaoRoute: AuthenticatedConciliacaoRoute,
   AuthenticatedConfiguracoesRoute: AuthenticatedConfiguracoesRoute,
+  AuthenticatedContasClientesRoute: AuthenticatedContasClientesRoute,
+  AuthenticatedContasFornecedoresRoute: AuthenticatedContasFornecedoresRoute,
   AuthenticatedEstoqueRoute: AuthenticatedEstoqueRoute,
   AuthenticatedFinanceiroRoute: AuthenticatedFinanceiroRoute,
   AuthenticatedFornecedoresRoute: AuthenticatedFornecedoresRoute,

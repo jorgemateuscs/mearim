@@ -13,6 +13,8 @@ import {
   Tags,
   Truck,
   CreditCard,
+  BookUser,
+  Receipt,
   FileText,
   History,
   Settings,
@@ -54,6 +56,8 @@ const groups: { label: string; items: { title: string; url: string; icon: any }[
       { title: "Conciliação", url: "/conciliacao", icon: Landmark },
       { title: "Categorias", url: "/categorias", icon: Tags },
       { title: "Meios de pagamento", url: "/meios-pagamento", icon: CreditCard },
+      { title: "Contas de clientes (fiado)", url: "/contas-clientes", icon: BookUser },
+      { title: "Contas de fornecedores", url: "/contas-fornecedores", icon: Receipt },
     ],
   },
   {
